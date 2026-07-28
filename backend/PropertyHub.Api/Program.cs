@@ -17,6 +17,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddPropertyHubAuthentication(builder.Configuration);
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

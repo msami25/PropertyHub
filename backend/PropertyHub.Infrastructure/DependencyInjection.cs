@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyHub.Application.Interfaces.Repositories;
 using PropertyHub.Infrastructure.Data;
+using PropertyHub.Infrastructure.Data.Repositories;
 using PropertyHub.Infrastructure.Identity;
 
 namespace PropertyHub.Infrastructure;
@@ -34,6 +35,7 @@ public static class DependencyInjection
             .AddSignInManager()
             .AddEntityFrameworkStores<ApplicationDbContext>();
         services.AddScoped<IUserAccountRepository, IdentityUserAccountRepository>();
+        services.AddScoped<ICityRepository, CityRepository>();
         return services;
     }
 }
