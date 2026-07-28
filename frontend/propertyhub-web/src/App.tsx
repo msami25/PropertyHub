@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "./auth/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { CityManagementPage } from "./pages/CityManagementPage";
 
 function FoundationPage({ title }: Readonly<{ title: string }>) {
   return (
@@ -67,9 +68,19 @@ export function App({ url = "/" }: Readonly<{ url?: string }>) {
     }
     if (pathname === "/admin" || pathname.startsWith("/admin/")) {
       if (!session) return <FoundationPage title="Sign in required" />;
-      return session.user.role === "Admin"
-        ? <FoundationPage title="Administration" />
-        : <FoundationPage title="Not authorized" />;
+      if (session.user.role !== "Admin") return <FoundationPage title="Not authorized" />;
+      if (pathname === "/admin/cities") {
+        return (
+          <CityManagementPage
+            accessToken={session.accessToken}
+            onSessionExpired={() => {
+              logout();
+              navigate("/login?returnUrl=/admin/cities");
+            }}
+          />
+        );
+      }
+      return <FoundationPage title="Administration" />;
     }
     return <FoundationPage title="Page not found" />;
   }
@@ -82,6 +93,9 @@ export function App({ url = "/" }: Readonly<{ url?: string }>) {
           <ClientLink href="/properties" navigate={navigate}>Properties</ClientLink>
           {session ? (
             <>
+              {session.user.role === "Admin" && (
+                <ClientLink href="/admin/cities" navigate={navigate}>Cities</ClientLink>
+              )}
               <ClientLink href={session.user.role === "Admin" ? "/admin" : "/my"} navigate={navigate}>
                 {session.user.fullName}
               </ClientLink>
