@@ -829,7 +829,7 @@ flowchart TB
     Worker --> Mail
 ```
 
-PropertyHub uses five local Docker services: `web-ssr`, `api`, `sqlserver`, `mailhog`, and the MailHog web inbox. The API is the only component allowed to access SQL Server or the image volume.
+PropertyHub uses four local Docker services: `web-ssr`, `api`, `sqlserver`, and `mailhog`; the MailHog service also exposes its web inbox. The API is the only component allowed to access SQL Server or the image volume.
 
 ### 9.2 Vite SSR and React Rendering Contract
 
@@ -1395,6 +1395,7 @@ An issue is Done only when:
 - `security`
 - `testing`
 - `documentation`
+- `integration`
 - `must-have`
 - `should-have`
 - `nice-to-have`
