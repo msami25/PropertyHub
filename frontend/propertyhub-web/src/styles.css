@@ -1,0 +1,35 @@
+:root {
+  color: #172033;
+  background: #f5f7fb;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem clamp(1rem, 5vw, 4rem);
+  background: #ffffff;
+  border-bottom: 1px solid #dce2ec;
+}
+
+a {
+  color: #155eef;
+}
+
+.brand {
+  color: #172033;
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 4rem clamp(1rem, 5vw, 4rem);
+}
