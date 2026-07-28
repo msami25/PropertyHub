@@ -41,6 +41,16 @@ describe("authentication routes", () => {
     expect(screen.getByRole("heading", { name: "Not authorized" })).toBeInTheDocument();
   });
 
+  it("protects City management from a non-admin User", () => {
+    render(
+      <AuthProvider initialSession={userSession}>
+        <App url="/admin/cities" />
+      </AuthProvider>
+    );
+
+    expect(screen.getByRole("heading", { name: "Not authorized" })).toBeInTheDocument();
+  });
+
   it("allows an Admin session into the Admin route", () => {
     render(
       <AuthProvider initialSession={{ ...userSession, user: { ...userSession.user, role: "Admin" } }}>
