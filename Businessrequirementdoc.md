@@ -1570,8 +1570,8 @@ The document cannot truthfully invent external URLs. Populate these two values a
 
 | Required evidence | URL |
 |---|---|
-| GitHub repository file (`Businessrequirementdoc.md`) | `PENDING — add the actual public GitHub file URL` |
-| Public GitHub Project board | `PENDING — add the actual public board URL` |
+| GitHub repository file (`Businessrequirementdoc.md`) | <https://github.com/msami25/PropertyHub/blob/main/Businessrequirementdoc.md> |
+| Public GitHub Project board | <https://github.com/users/msami25/projects/1> |
 
 External completion checklist:
 
