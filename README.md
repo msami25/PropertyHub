@@ -5,9 +5,10 @@ Vite SSR, EF Core, SQL Server, and Docker Compose.
 
 ## Current status
 
-Phase 1 provides the project foundation: layered projects, the initial database schema, health
-checks, SSR application shell, automated smoke tests, and Docker configuration. Authentication and
-feature workflows are intentionally not implemented yet.
+Phases 1 and 2 provide the layered foundation plus registration, JWT login, `User`/`Admin` roles,
+configured Admin seeding, database-backed disabled-account enforcement, protected API policies,
+and browser-memory authentication with protected route states. City and Property CRUD are not
+implemented yet.
 
 ## Architecture
 
@@ -40,6 +41,23 @@ Copy `.env.example` to `.env` and replace every example secret before starting c
 commit `.env`. Key settings cover SQL Server, JWT signing, the seeded administrator, local image
 storage, Open-Meteo, CORS, and the internal/public API URLs.
 
+The JWT signing key must contain at least 32 characters. Public registration always creates a
+`User`; it never accepts a role. The configured seed account receives `Admin`. JWTs expire after 30
+minutes and are held only in React memory, so a browser reload requires sign-in again.
+
+## Authentication API
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/api/auth/register` | Public, rate limited |
+| `POST` | `/api/auth/login` | Public, rate limited |
+| `GET` | `/api/auth/me` | Active authenticated user |
+| `GET` | `/api/admin/session` | Active Admin only |
+
+Missing or invalid JWTs return `401`. Authenticated Users receive `403` on Admin endpoints.
+Disabled accounts receive `403` at login and on protected requests, including requests made with a
+token issued before disablement.
+
 ## Foundation verification
 
 ```powershell
@@ -57,8 +75,9 @@ docker compose --env-file .env.example config --quiet
 ## Docker
 
 The planned local application URL is `http://localhost:3000`, with the API at
-`http://localhost:8080`. Phase 1 validates the Docker configuration only; full-stack startup and UAT
-will be verified after mandatory feature slices and migration startup are complete.
+`http://localhost:8081`. Docker configuration is validated, and the API now applies migrations and
+seeds roles/Admin during startup. Full-stack startup and UAT will be verified after mandatory
+feature slices are complete.
 
 The final startup command will be:
 
@@ -74,5 +93,5 @@ acceptance results will be recorded in `docs/UAT_REPORT.md`.
 
 ## Known limitations
 
-See `docs/SCOPE_CUTS.md`. Phase 1 contains no authentication, CRUD endpoints, upload workflow,
-Open-Meteo call, admin dashboard, moderation, or enquiry functionality.
+See `docs/SCOPE_CUTS.md`. City/Property CRUD, image uploads, Open-Meteo, user administration,
+dashboard metrics, moderation, and enquiries remain future slices.

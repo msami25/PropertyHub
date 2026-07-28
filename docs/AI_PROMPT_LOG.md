@@ -42,17 +42,36 @@ reviewed entries before Gate submission.
 - **Review:** Changes are being verified through restore, build, tests, migration scripting, Compose
   validation, and focused commits.
 
+### 5. Implement JWT authentication as an isolated vertical slice
+
+- **Prompt:** Complete registration/login, User/Admin roles, configured Admin seeding,
+  disabled-account enforcement, protected routes, `401`/`403` tests, frontend integration,
+  documentation, and verification without beginning City CRUD.
+- **Why it mattered:** Defined a security-complete Phase 2 boundary and prevented unrelated domain
+  work from entering the authentication commits.
+- **Review:** The backend follows controller to service to identity repository, JWTs stay in browser
+  memory, and HTTP integration tests exercise active, disabled, User, and Admin behavior.
+
 ## Testing
 
-Entries will be added as test-generation prompts materially affect later slices.
+The Phase 2 implementation prompt produced service tests with Moq and HTTP integration coverage for
+registration, login, role enforcement, disabled accounts, and invalid tokens.
 
 ## Security
 
-Entries will be added as authentication and upload-security prompts materially affect later slices.
+The Phase 2 implementation prompt established short-lived signed JWTs, strict issuer/audience/key
+validation, per-request account-status checks, rate limiting, and safe Admin seeding.
 
 ## Docker and debugging
 
-Entries will be added when container verification or diagnosed defects materially affect the build.
+### 6. Verify authentication in the complete Docker environment
+
+- **Prompt:** Run restore, builds, tests, migration validation, Compose validation, and live
+  container checks; fix Phase 2 failures before reporting.
+- **Why it mattered:** Required evidence that authentication works against SQL Server and the
+  production-shaped API/SSR containers, not only the in-memory integration host.
+- **Review:** The live probe covered health, registration, login, seeded Admin access, 401/403
+  behavior, and immediate rejection of a disabled account's existing JWT.
 
 ## Documentation
 
