@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\PropertyHub.Domain\PropertyHub.Domain.csproj" />
+  </ItemGroup>
+</Project>
