@@ -5,7 +5,8 @@ using PropertyHub.Domain.Exceptions;
 namespace PropertyHub.Api.Middleware;
 
 public sealed class GlobalExceptionHandler(
-    ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+    ILogger<GlobalExceptionHandler> logger,
+    IHostEnvironment environment) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
@@ -30,7 +31,9 @@ public sealed class GlobalExceptionHandler(
         {
             Status = statusCode,
             Title = isExpected ? "The request could not be completed." : "An unexpected error occurred.",
-            Detail = isExpected ? exception.Message : "The server could not complete the request.",
+            Detail = isExpected || environment.IsEnvironment("Testing")
+                ? exception.Message
+                : "The server could not complete the request.",
             Instance = httpContext.Request.Path
         };
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;
