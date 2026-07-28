@@ -57,6 +57,18 @@ reviewed entries before Gate submission.
 The Phase 2 implementation prompt produced service tests with Moq and HTTP integration coverage for
 registration, login, role enforcement, disabled accounts, and invalid tokens.
 
+### 7. Implement City as the second Gate CRUD entity
+
+- **Prompt:** Complete the Admin-only City API, controller-service-repository flow, validation,
+  management UI, authorization/CRUD tests, referential conflict handling, documentation, and
+  Docker verification without beginning Property CRUD.
+- **Why it mattered:** Delivered the second mandatory Gate CRUD entity as a complete vertical slice
+  rather than a database-only model.
+- **Review:** The implementation keeps active reference data public, protects all mutations with
+  the Admin policy, returns 409 for duplicate/referenced cities, seeds canonical coordinates, and
+  exercises the same flow through unit, integration, React, Docker API, SQL Server, and browser UI
+  checks.
+
 ## Security
 
 The Phase 2 implementation prompt established short-lived signed JWTs, strict issuer/audience/key
