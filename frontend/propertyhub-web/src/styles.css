@@ -17,6 +17,12 @@ header {
   border-bottom: 1px solid #dce2ec;
 }
 
+nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 a {
   color: #155eef;
 }
@@ -32,4 +38,50 @@ main {
   max-width: 72rem;
   margin: 0 auto;
   padding: 4rem clamp(1rem, 5vw, 4rem);
+}
+
+form {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 28rem;
+}
+
+input,
+button {
+  border: 1px solid #aeb8c8;
+  border-radius: 0.4rem;
+  font: inherit;
+  padding: 0.7rem;
+}
+
+button {
+  color: #ffffff;
+  background: #155eef;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.link-button {
+  border: 0;
+  padding: 0;
+  color: #155eef;
+  background: transparent;
+}
+
+.error {
+  color: #b42318;
+}
+
+.success {
+  color: #067647;
+}
+
+.hint {
+  margin: 0;
+  color: #475467;
+  font-size: 0.9rem;
 }
