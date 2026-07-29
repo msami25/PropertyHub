@@ -1,230 +1,286 @@
 # PropertyHub
 
-PropertyHub is a local multi-user property marketplace built with a .NET 8 Web API, React 19 with
-Vite SSR, EF Core, SQL Server, and Docker Compose.
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
+[![React](https://img.shields.io/badge/React-19.1.1-149ECA)](https://react.dev/)
+[![Backend coverage](https://img.shields.io/badge/backend%20coverage-91.2%25-brightgreen)](docs/coverage/index.html)
+[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-local-2496ED)](docker-compose.yml)
+[![License](https://img.shields.io/badge/license-not%20specified-lightgrey)](#licence-status)
 
-## Current status
+PropertyHub is a locally deployed, multi-user property marketplace for publishing, moderating, and
+discovering sale and rental listings. Owners manage their own properties and images, visitors see
+only approved and available listings, and Administrators manage Cities, moderation, roles, account
+access, and live platform metrics.
 
-Phases 1 through 8 provide the layered foundation, JWT authentication and authorization, City CRUD,
-Property CRUD, secure local property images, resilient property weather, protected Admin user
-management with live database metrics, and final coverage/UAT evidence. Public property list and
-detail pages are server-rendered and hydrated; owners manage only their listings and images, and
-Admins moderate listings, cities, roles, and account access. Backend line coverage is 91.2%.
+The application is built for the Capstone Build Sprint Gate with a .NET 8 Web API, React 19 and
+Vite SSR, SQL Server, secure local uploads, Open-Meteo weather, and Docker Compose.
+
+> [!IMPORTANT]
+> **Loom submission links are still required.**
+>
+> - Technical walkthrough, 10–15 minutes: **LOOM_TECHNICAL_URL_PENDING**
+> - Non-technical demo, 5–10 minutes: **LOOM_DEMO_URL_PENDING**
+>
+> Recording scripts: [docs/LOOM_VIDEO_SCRIPTS.md](docs/LOOM_VIDEO_SCRIPTS.md)
+
+## Status and value
+
+| Area | Status | Evidence |
+|---|---|---|
+| Mandatory application implementation | PASS | Authentication, two CRUD entities, images, weather, Admin area |
+| Automated tests and coverage | PASS | 79 backend tests; 91.2% backend line coverage |
+| Docker deployment and persistence | PASS | Full rebuild, health, restart, SQL data, and upload persistence UAT |
+| Documentation package | PASS | Architecture, ADRs, UAT, AI log, coverage, and recording scripts |
+| Recorded Loom videos and final links | BLOCKED | The scripts exist; the videos have not been recorded or linked |
+
+PropertyHub delivers three practical benefits:
+
+- **Visitors** browse a privacy-safe catalogue of approved, available properties and see useful
+  current weather for the Property City.
+- **Owners** create, edit, soft-delete, mark Sold or Rented, and manage one to five protected
+  property images.
+- **Administrators** moderate listings, manage Cities and account access, change roles, and inspect
+  live SQL-backed metrics.
+
+## Core capabilities
+
+- ASP.NET Core Identity registration and JWT login with `User` and `Admin` roles.
+- Database-backed ActiveUser enforcement that immediately invalidates access after role or account
+  status changes.
+- Full Property and City CRUD through controllers, services, domain-specific repositories, EF
+  Core, and SQL Server.
+- Separate `ModerationStatus` (`Pending`, `Approved`, `Rejected`) and
+  `AvailabilityStatus` (`Available`, `Sold`, `Rented`).
+- Owner-scoped Property operations and Admin-only City, moderation, role, status, and metrics APIs.
+- Protected local JPEG, PNG, and WebP uploads with MIME, signature, decode, size, dimension,
+  ownership, path, and count validation.
+- Public React/Vite server rendering and browser hydration for the Property list and detail routes.
+- Open-Meteo current conditions using stored City coordinates, a typed `HttpClient`, a five-second
+  default timeout, a 30-minute successful-result cache, and graceful failure behavior.
+- SQL Server and upload persistence through named Docker volumes.
+- Problem Details responses, authentication and upload rate limits, health endpoints, and
+  privacy-safe public DTOs.
 
 ## Architecture
 
-Feature requests will follow this dependency direction:
+```mermaid
+flowchart LR
+    Browser["Browser"]
+    Web["React 19 + Vite SSR<br/>web container :3000"]
+    Controllers["ASP.NET Core controllers"]
+    Services["Application services"]
+    Repositories["Domain-specific repositories"]
+    DbContext["EF Core ApplicationDbContext"]
+    Sql["SQL Server 2022<br/>sqlserver container :1433"]
+    Uploads[("propertyhub-uploads<br/>named volume")]
+    SqlVolume[("propertyhub-sql-data<br/>named volume")]
+    Weather["Open-Meteo API"]
+
+    Browser -->|"HTML and hydration"| Web
+    Web -->|"SSR public API calls"| Controllers
+    Browser -->|"Hydrated API calls"| Controllers
+    Controllers --> Services
+    Services --> Repositories
+    Repositories --> DbContext
+    DbContext --> Sql
+    Controllers -->|"controlled image streaming"| Browser
+    Services --> Uploads
+    Services -->|"typed HttpClient"| Weather
+    Sql --- SqlVolume
+```
+
+The required dependency direction is:
 
 ```text
 React/Vite SSR
-    -> API controllers
+    -> ASP.NET Core controllers
         -> application services
             -> domain-specific repository interfaces
                 -> EF Core repository implementations
                     -> SQL Server
 ```
 
-Controllers must not use EF Core or repositories directly. The API is the only process allowed to
-access SQL Server and the uploads volume.
+Controllers never access EF Core directly. The API is the only process permitted to access SQL
+Server and protected image storage.
 
-## Frontend experience
+More detail:
 
-The React/Vite SSR frontend uses a shared CSS token system with a restrained black-and-gold visual
-language. The responsive navigation includes active-page treatment, an accessible mobile menu,
-styled account controls, a skip link, and visible keyboard focus. Public Property routes retain
-meaningful SSR content and browser hydration; authenticated data still loads only after an
-in-memory session exists.
+- [Architecture and request flows](docs/ARCHITECTURE.md)
+- [Architecture Decision Records](adr/README.md)
+- [ADR-0001: Layered backend architecture](adr/0001-layered-backend-architecture.md)
+- [ADR-0002: JWT authorization and immediate invalidation](adr/0002-jwt-authorization-and-token-invalidation.md)
+- [ADR-0003: Protected local image storage](adr/0003-protected-local-image-storage.md)
+- [ADR-0004: Public-route Vite SSR](adr/0004-public-route-vite-ssr.md)
+- [ADR-0005: Resilient Open-Meteo integration](adr/0005-resilient-open-meteo-integration.md)
 
-The owner workspace at `http://localhost:3000/my/properties` provides:
+## Technology stack
 
-- a grouped, responsive create/edit form with every existing Property field and validation rule;
-- clear loading, empty, success, validation, authorization, and server-error states;
-- responsive listing cards with price, City, type, purpose, moderation, and availability hierarchy;
-- accessible Pending, Approved, Rejected, Available, Sold, and Rented status badges;
-- unchanged edit, delete, Sold/Rented, image upload, primary-image, and refresh behavior.
+Versions come from the checked-in project, package, tool, and container files.
 
-No Tailwind, component library, external font, or additional frontend runtime dependency is used.
-Motion is restrained and disabled through `prefers-reduced-motion` when requested.
+| Area | Technology | Version |
+|---|---|---|
+| Backend runtime | .NET / ASP.NET Core | 8.0 |
+| Authentication | ASP.NET Core Identity and JwtBearer | 8.0.20 |
+| Persistence | EF Core SQL Server | 8.0.20 |
+| Image validation | SixLabors.ImageSharp | 3.1.12 |
+| Frontend | React / React DOM | 19.1.1 |
+| SSR server | Express | 5.1.0 |
+| Build tooling | Vite / TypeScript | 7.3.6 / 5.9.2 |
+| Frontend tests | Vitest / Testing Library | 3.2.7 / 16.3.0 |
+| Backend tests | xUnit / Moq / FluentAssertions | 2.9.2 / 4.20.72 / 6.12.2 |
+| Coverage | Coverlet collector / ReportGenerator | 6.0.2 / 5.5.11 |
+| Database container | Microsoft SQL Server | 2022 latest, Express edition |
+| Container runtimes | .NET ASP.NET 8 / Node Alpine | 8.0 / 24 |
+
+## Repository structure
+
+```text
+PropertyHub.sln
+backend/
+  PropertyHub.Api/             HTTP, auth, middleware, health
+  PropertyHub.Application/     DTOs, interfaces, services, validation
+  PropertyHub.Domain/          entities, enums, roles, exceptions
+  PropertyHub.Infrastructure/  EF Core, Identity, repositories, files, Open-Meteo
+frontend/propertyhub-web/      React, Vite SSR, hydration, API clients, Vitest tests
+tests/
+  PropertyHub.UnitTests/
+  PropertyHub.IntegrationTests/
+adr/                           numbered Architecture Decision Records
+docs/                          Gate, scope, coverage, architecture, UAT, scripts
+uat-report.md                  assessment-facing UAT summary
+ai-collaboration-log.md        exactly 20 reviewed AI interactions
+docker-compose.yml
+```
 
 ## Prerequisites
 
-- Docker Desktop with Docker Compose
-- .NET 8 SDK for host development
-- Node.js 24 and npm for host frontend development
+For the recommended Docker workflow:
 
-The checked-in projects target `net8.0`. A newer SDK may build them, while the container build uses
-the .NET 8 SDK explicitly.
+- Git
+- Docker Desktop with Docker Compose v2
+- At least 4 GB of memory available to Docker
+- Ports `1433`, `3000`, and `8081` available
 
-## Configuration
+For host development and test execution:
 
-Copy `.env.example` to `.env` and replace every example secret before starting containers. Never
-commit `.env`. Key settings cover SQL Server, JWT signing, the seeded administrator, local image
-storage, Open-Meteo, CORS, and the internal/public API URLs.
+- .NET 8 SDK
+- Node.js 24 and npm
 
-The JWT signing key must contain at least 32 characters. Public registration always creates a
-`User`; it never accepts a role. The configured seed account receives `Admin`. JWTs expire after 30
-minutes and are held only in React memory, so a browser reload requires sign-in again.
+## Fresh-machine quick start
 
-## Authentication API
+1. Clone and enter the repository:
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `POST` | `/api/auth/register` | Public, rate limited |
-| `POST` | `/api/auth/login` | Public, rate limited |
-| `GET` | `/api/auth/me` | Active authenticated user |
-| `GET` | `/api/admin/session` | Active Admin only |
+   ```powershell
+   git clone https://github.com/msami25/PropertyHub.git
+   Set-Location PropertyHub
+   ```
 
-Missing or invalid JWTs return `401`. Authenticated Users receive `403` on Admin endpoints.
-Disabled accounts receive `403` at login and on protected requests, including requests made with a
-token issued before disablement.
+2. Create the untracked local environment file:
 
-## City API
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `GET` | `/api/cities` | Public; active cities only |
-| `GET` | `/api/admin/cities` | Active Admin |
-| `GET` | `/api/admin/cities/{cityId}` | Active Admin |
-| `POST` | `/api/admin/cities` | Active Admin |
-| `PUT` | `/api/admin/cities/{cityId}` | Active Admin |
-| `DELETE` | `/api/admin/cities/{cityId}` | Active Admin |
+3. Replace every example credential in `.env`. At minimum, generate new values for:
 
-City names are trimmed and unique after invariant normalization. Names must contain 2–100
-characters, latitude must be between -90 and 90, and longitude must be between -180 and 180.
-Deleting a city referenced by a property returns `409 Conflict`. The migration seeds Lahore,
-Karachi, Islamabad, Rawalpindi, Faisalabad, Multan, Peshawar, and Quetta.
+   - `MSSQL_SA_PASSWORD`
+   - the password embedded in `ConnectionStrings__DefaultConnection`
+   - `Jwt__SigningKey`, using at least 32 random characters
+   - `SeedAdmin__Email`
+   - `SeedAdmin__Password`
 
-After signing in as the configured Admin, open `http://localhost:3000/admin/cities` to use the City
-management UI.
+4. Validate and start the complete stack:
 
-## Property API
+   ```powershell
+   docker compose config --quiet
+   docker compose up --build
+   ```
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `GET` | `/api/properties` | Public; approved and available only |
-| `GET` | `/api/properties/{propertyId}` | Public; approved and available only |
-| `GET` | `/api/users/me/properties` | Active owner |
-| `GET` | `/api/users/me/properties/{propertyId}` | Active owner; owner-scoped |
-| `POST` | `/api/properties` | Active user |
-| `PUT` | `/api/properties/{propertyId}` | Active owner |
-| `PATCH` | `/api/properties/{propertyId}/availability` | Active owner |
-| `DELETE` | `/api/properties/{propertyId}` | Active owner |
-| `GET` | `/api/admin/properties` | Active Admin |
-| `POST` | `/api/admin/properties/{propertyId}/moderation` | Active Admin |
+5. Wait for all three health checks to pass, then open:
 
-New and edited listings are `Pending`. Admins may set `Approved` or `Rejected`; rejection requires a
-reason. Owners may mark sale listings `Sold` and rental listings `Rented`. Sold, rented,
-soft-deleted, unapproved, and disabled-owner listings are excluded from public results. Owner
-lookups are scoped by the authenticated user so another owner's identifier returns `404`.
+   - Web application: <http://localhost:3000>
+   - API base URL: <http://localhost:8081>
+   - API liveness: <http://localhost:8081/health/live>
+   - API readiness: <http://localhost:8081/health/ready>
 
-Essential public filters support City, purpose, and property type. Use `/my/properties` for owner
-management and `/admin/properties` for moderation.
+The API applies EF Core migrations and seeds roles, the configured Admin, and canonical Cities
+during startup. Normal restarts preserve SQL data and uploaded files. Do not run
+`docker compose down -v` unless an intentional destructive reset is required.
 
-## Property image API
+### Stop and restart
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `POST` | `/api/properties/{propertyId}/images` | Active owner; multipart field `images` |
-| `PUT` | `/api/properties/{propertyId}/images/{imageId}/primary` | Active owner |
-| `DELETE` | `/api/properties/{propertyId}/images/{imageId}` | Active owner |
-| `GET` | `/api/properties/{propertyId}/images/{imageId}` | Public listing, owner, or Admin |
+```powershell
+docker compose down
+docker compose up --build
+```
 
-Create the property first, then upload one to five JPEG, PNG, or WebP images of at most 5 MB each.
-The API checks extension, declared MIME type, magic bytes, successful decode, dimensions (at most
-8,000 pixels per side and 40 megapixels), count, ownership, and listing state. It generates storage
-names, stores files outside the web root, and streams them with access control and
-`X-Content-Type-Options: nosniff`. The first upload is primary. Changing images returns an approved
-listing to `Pending`; an Admin cannot approve a listing without an image, and the last image cannot
-be deleted.
+`docker compose down` preserves the named volumes. The destructive `-v` option does not.
 
-The React owner page supports upload, primary selection, and deletion. Public cards/details and the
-Admin moderation page display the appropriate image set. Runtime files persist in the
-`propertyhub-uploads` Docker volume and remain excluded from Git.
+## Configuration and secrets
 
-## Property weather API
+| Variable | Purpose |
+|---|---|
+| `MSSQL_SA_PASSWORD` | SQL Server administrator password |
+| `ConnectionStrings__DefaultConnection` | API connection to the `sqlserver` service |
+| `Jwt__Issuer` / `Jwt__Audience` | JWT validation boundaries |
+| `Jwt__SigningKey` | JWT HMAC signing secret, minimum 32 characters |
+| `Jwt__AccessTokenMinutes` | Access-token lifetime; configured as 30 minutes |
+| `SeedAdmin__Email` / `SeedAdmin__Password` / `SeedAdmin__FullName` | Local seeded Admin |
+| `ImageStorage__RootPath` | Protected upload root inside the API container |
+| `OpenMeteo__BaseUrl` | Open-Meteo API root |
+| `OpenMeteo__TimeoutSeconds` | Finite provider timeout; default example is 5 |
+| `OpenMeteo__CacheMinutes` | Successful-result cache duration; default example is 30 |
+| `Cors__AllowedOrigins__0` | Explicit browser origin |
+| `API_INTERNAL_BASE_URL` | SSR server-to-API address |
+| `VITE_PUBLIC_API_BASE_URL` | Browser-to-API address embedded at frontend build time |
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `GET` | `/api/properties/{propertyId}/weather` | Public; approved and available property only |
+Security rules:
 
-The API requests current conditions from Open-Meteo using the property's stored City latitude and
-longitude. A typed `HttpClient` has a five-second timeout, and successful results are cached by City
-for 30 minutes. Provider errors, timeouts, invalid responses, and unavailable observations return a
-provider-neutral unavailable result without breaking the property API or page. The property detail
-UI loads weather independently and displays a friendly fallback when it is unavailable.
+- Never commit `.env`, passwords, connection strings containing real credentials, JWT signing
+  keys, or access tokens.
+- Do not display seeded Admin credentials in screenshots or recordings.
+- Public registration always creates a `User`; it never accepts a role.
+- JWTs are kept only in React memory and are not written to local or session storage.
+- Replace all `.env.example` values before using the environment beyond disposable local testing.
 
-`OpenMeteo__BaseUrl`, `OpenMeteo__TimeoutSeconds`, and `OpenMeteo__CacheMinutes` may be configured
-through environment variables. Safe defaults are documented in `.env.example`.
+## Application routes
 
-## Admin dashboard and user management
+| Route | Audience |
+|---|---|
+| `/` and `/properties` | Public server-rendered Property catalogue |
+| `/properties/{id}` | Public server-rendered Property detail and weather |
+| `/register` | Public account registration |
+| `/login` | Public login |
+| `/my` and `/my/properties` | Authenticated owner workspace |
+| `/admin` and `/admin/users` | Admin metrics and user management |
+| `/admin/properties` | Admin moderation |
+| `/admin/cities` | Admin City management |
 
-| Method | Endpoint | Access |
-|---|---|---|
-| `GET` | `/api/admin/dashboard` | Active Admin |
-| `GET` | `/api/admin/users?search=&page=1&pageSize=20` | Active Admin |
-| `PATCH` | `/api/admin/users/{userId}/role` | Active Admin; version checked |
-| `PATCH` | `/api/admin/users/{userId}/status` | Active Admin; version checked |
+## Testing
 
-Open `http://localhost:3000/admin` after signing in as the configured Admin. The dashboard shows
-live account, Property moderation, and City totals from SQL Server. The searchable user table
-supports `User`/`Admin` role changes and account disable/reactivate actions. Mutations send the
-current opaque version in `If-Match`; stale changes return `412 Precondition Failed`.
-
-Status changes require a 5–500-character reason and create an immutable audit record. Role and
-status changes increment the account token version, so existing JWTs fail immediately. Admins
-cannot disable or demote themselves, Admin status cannot be disabled through user management, and
-the last active Admin cannot be demoted.
-
-## Foundation verification
+### Backend
 
 ```powershell
 dotnet restore PropertyHub.sln
 dotnet build PropertyHub.sln --no-restore
 dotnet test PropertyHub.sln --no-build
-
-npm.cmd ci --prefix frontend/propertyhub-web
-npm.cmd run test --prefix frontend/propertyhub-web
-npm.cmd run build --prefix frontend/propertyhub-web
-
-docker compose --env-file .env.example config --quiet
-powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase5DockerUat.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase7DockerUat.ps1
-powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase8PersistenceUat.ps1
 ```
 
-## Docker
+The retained final evidence contains 38 unit tests and 41 integration tests: 79 backend tests.
 
-The local application URL is `http://localhost:3000`, with the API at `http://localhost:8081`.
-Docker startup, automatic migrations, seeded roles/Admin/cities, and the Phase 2–3 authentication
-and City journeys were previously verified. On 2026-07-29, the Phase 4 images built successfully,
-all three services became healthy, the Property migration applied to the preserved SQL volume, and
-the live Property API and public SSR journeys passed. A direct-route SSR serialization defect found
-during that UAT was fixed and reverified through the production web container. Phase 5 then rebuilt
-only API/web, applied the image-dimension migration, and passed the live secure-upload, moderation,
-SSR display, controlled retrieval, deletion, and upload-volume persistence journey. Phase 6 rebuilt
-only API/web and passed live Open-Meteo success, cache, forced-provider-failure fallback, property
-page continuity, SSR hydration, and provider restoration checks without recreating named volumes.
-Phase 7 applied the Admin user-management migration, rebuilt only API/web, and passed live metrics,
-authorization, role transition, immediate token invalidation, disable/reactivate audit, protected
-UI, safe direct-route SSR, and named-volume preservation checks. The final Phase 8 rebuild used the
-same Compose configuration and preserved both named volumes. A subsequent full Compose restart
-retained live SQL counts, an approved Property, its image SHA-256, weather, and SSR output, and all
-services recovered healthy.
-
-The complete startup command is:
+### Frontend
 
 ```powershell
-docker compose up --build
+Push-Location frontend/propertyhub-web
+npm ci
+npm test -- --run
+npm run build
+Pop-Location
 ```
 
-## Coverage and UAT
+The current frontend suite contains 31 Vitest tests. The production command builds both the browser
+bundle and the SSR bundle.
 
-The final Coverlet run passed 38 unit and 41 integration tests and measured 91.2% backend line
-coverage: 2,382 covered of 2,610 coverable lines. The report includes API, Application, Domain, and
-Infrastructure. Only generated EF Core migration files are excluded through
-`tests/coverage.runsettings`.
-
-Restore the repository-local tools, collect both test-project reports, and merge them with:
+### Coverage
 
 ```powershell
 dotnet tool restore
@@ -238,41 +294,66 @@ dotnet reportgenerator `
   -reporttypes:"HtmlSummary;Cobertura;TextSummary"
 ```
 
+Verified backend line coverage is **91.2%: 2,382 of 2,610 coverable lines**. Generated EF Core
+migrations are the only excluded source through `tests/coverage.runsettings`.
+
 Committed evidence:
 
-- `docs/coverage/coverage.cobertura.xml`
-- `docs/coverage/index.html`
-- `docs/coverage/Summary.txt`
-- `docs/UAT_REPORT.md`
-- `docs/GATE_REPORT.md`
+- [Readable HTML report](docs/coverage/index.html)
+- [Cobertura report](docs/coverage/coverage.cobertura.xml)
+- [Text summary](docs/coverage/Summary.txt)
 
-## Walkthrough outlines
+## UAT and Docker evidence
 
-The technical walkthrough should remain under 15 minutes:
+The Docker environment has been exercised for registration/login, authorization, City and Property
+CRUD, moderation, availability, secure images, weather success/cache/failure, Admin management,
+SSR privacy, hydration, health, restart, and persistence.
 
-1. Show the controller/service/domain-specific-repository architecture and project structure.
-2. Explain Identity/JWT, ActiveUser/token-version enforcement, and 401/403 behavior.
-3. Show the SQL model and migrations for User, City, Property, PropertyImage, and status audit.
-4. Demonstrate Property/City CRUD, moderation, image security, Open-Meteo resilience, and Admin
-   management.
-5. Run or show the 79 backend tests, 30 frontend tests, 91.2% coverage report, Compose health, and
-   persistence UAT evidence.
+- [Assessment-facing UAT report](uat-report.md)
+- [Detailed execution record](docs/UAT_REPORT.md)
+- [Final Gate report](docs/GATE_REPORT.md)
+- [Scope cuts](docs/SCOPE_CUTS.md)
 
-The non-technical walkthrough should remain under 10 minutes and avoid showing code:
+The assessment-facing report contains more than ten acceptance tests and distinguishes verified
+passes from the narrow-screen responsive check that still needs manual execution.
 
-1. Register and sign in as a User.
-2. Create/edit a Property, upload an image, and show the Pending owner view.
-3. Sign in as Admin, manage a City, moderate the Property, view live metrics, and demonstrate a
-   safe role/status change.
-4. Return to the public listing/detail pages and show the image and current weather.
-5. Delete the disposable Property and confirm the expected public/owner state.
+## AI collaboration
 
-The recordings and externally accessible Loom links are not present, so both video acceptance
-items remain `BLOCKED` in the final Gate report.
+AI assistance was used as a reviewed engineering aid for requirements reconciliation, architecture,
+vertical-slice implementation, security analysis, debugging, testing, UAT, UI refinement, and
+documentation. Outputs were accepted only after source review and executable verification; some
+were modified when initial output or assumptions needed to align with the canonical Gate.
 
-## Known limitations
+- [AI collaboration log — exactly 20 prompts](ai-collaboration-log.md)
+- [Original implementation prompt evidence](docs/AI_PROMPT_LOG.md)
 
-See `docs/SCOPE_CUTS.md`. Contact reveal, enquiries, favourites, advanced filters, MailHog/outbox,
-and background image cleanup remain deferred because they are outside the higher-priority canonical
-Gate checklist and the approved Phase 8 boundary. Loom recording remains an external submission
-blocker, not an implemented feature or acceptable mandatory scope cut.
+No AI-generated test result, coverage percentage, credential, URL, or UAT pass is claimed without
+repository evidence.
+
+## Known limitations and deferred scope
+
+- The Loom recordings and real URLs remain outstanding.
+- A real 360-pixel browser viewport UAT pass has not been recorded; responsive CSS, desktop
+  overflow, keyboard focus, and component states were verified.
+- Authenticated contact reveal, enquiries, MailHog/outbox delivery, favourites, and advanced
+  filters remain deferred outside the canonical Gate.
+- Access tokens are intentionally short-lived and memory-only; reloading requires login.
+- Background deletion of hidden image files is deferred.
+- This is a local capstone deployment, not a production cloud configuration.
+
+See [docs/SCOPE_CUTS.md](docs/SCOPE_CUTS.md) for the full rationale.
+
+## Recording and submission
+
+- [Technical and non-technical scripts](docs/LOOM_VIDEO_SCRIPTS.md)
+- Technical Loom URL: **LOOM_TECHNICAL_URL_PENDING**
+- Non-technical Loom URL: **LOOM_DEMO_URL_PENDING**
+
+Do not replace these placeholders until both recordings meet their required durations and have
+been reviewed for exposed credentials, tokens, personal data, terminals, or private browser tabs.
+
+## Licence status
+
+No licence file or explicit software licence is present in this repository. The project must not be
+represented as MIT, Apache, GPL, or otherwise open source unless the owner deliberately adds a
+licence later. In the absence of a licence grant, normal copyright restrictions apply.
