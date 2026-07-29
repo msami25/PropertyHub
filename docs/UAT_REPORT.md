@@ -3,15 +3,15 @@
 The complete Gate UAT remains `BLOCKED` until all mandatory phases are implemented and exercised.
 Phase 2 authentication and Phase 3 City CRUD were manually exercised against the Docker
 environment on 2026-07-28. Phase 4 automated workflows pass and live Docker execution completed on
-2026-07-29. The live Phase 4 UAT result is `FAIL` because direct requests to private frontend routes
-return HTTP 500, although the API, public SSR, and hydrated client-navigation workflows pass.
+2026-07-29. The direct-route SSR defect found during the first execution was fixed, and the affected
+Docker and browser checks passed on rerun.
 
 | ID | Scenario | Expected result | Actual result | Evidence | Status |
 |---|---|---|---|---|---|
 | UAT-01 | Register and log in | Active user receives a JWT and can enter protected routes | Registration returned 201, login returned 200, and `/api/auth/me` returned 200 | Docker HTTP probe; `AuthenticationEndpointTests` | PASS |
 | UAT-02 | Enforce authorization | Missing/invalid tokens return 401, User-to-Admin access returns 403, and disabled accounts cannot log in or reuse a token | Missing and invalid tokens returned 401; User-to-Admin, disabled login, and disabled existing token returned 403; seeded Admin access returned 200 | Docker HTTP/SQL probe; `AuthenticationEndpointTests` | PASS |
 | UAT-03 | Complete City CRUD | Admin lists, creates, edits, and deletes an unused City; referenced deletion returns 409 | Seeded Admin completed create/read/update/delete through Docker API and create/edit/delete through the browser UI; invalid input returned 400, duplicates and referenced deletion returned 409 | Docker HTTP/SQL and browser probes; `CityEndpointTests`; `CityServiceTests`; `city-management.test.tsx` | PASS |
-| UAT-04 | Complete Property CRUD | Owner creates, views, edits, marks availability, and deletes a listing; Admin moderation controls public visibility | SQL-backed API workflow passed, public SSR passed, and hydrated owner/Admin routes worked without console errors. Direct requests to `/login`, `/my/properties`, and `/admin/properties` returned HTTP 500 because the SSR server serialized undefined public-page data | Docker Compose/API/SQL/browser probes; container log; `PropertyEndpointTests`; `PropertyServiceTests`; property frontend and SSR tests | FAIL |
+| UAT-04 | Complete Property CRUD | Owner creates, views, edits, marks availability, and deletes a listing; Admin moderation controls public visibility | SQL-backed Property workflow, authorization, moderation, public visibility, direct SSR routes, owner/Admin login, hydration, and public-data privacy passed after the SSR transfer fix | Docker Compose/API/SQL/browser probes; `PropertyEndpointTests`; `PropertyServiceTests`; 22 frontend tests | PASS |
 | UAT-05 | Upload property images | Valid images persist and display; unsafe input is rejected | Not implemented | Pending | BLOCKED |
 | UAT-06 | Display Open-Meteo weather | Details show weather or a graceful unavailable state | Not implemented | Pending | BLOCKED |
 | UAT-07 | Manage users and metrics | Admin changes roles/status and sees live database counts | Not implemented | Pending | BLOCKED |
@@ -75,7 +75,23 @@ return HTTP 500, although the API, public SSR, and hydrated client-navigation wo
 12. Directly requested `/login`, `/register`, `/my/properties`, and `/admin/properties`; every route
     returned HTTP 500. The web container logged
     `TypeError: Cannot read properties of undefined (reading 'replaceAll')` from the SSR serializer,
-    so UAT-04 is `FAIL`.
+    producing the initial UAT failure.
+13. Traced the failure to `loadPublicPageData` returning `undefined` for non-public routes,
+    `JSON.stringify(undefined)` returning a non-string `undefined`, and the server serializer then
+    calling `replaceAll` on that value.
+14. Changed the SSR transfer boundary to represent absent public data as JSON `null`. Added direct
+    SSR regression coverage for all four affected routes; the full frontend suite passed 22 tests,
+    and both production client and SSR builds passed.
+15. Rebuilt and recreated only the `web` service. API, SQL Server, and named volumes were not
+    recreated or removed; all three services remained healthy.
+16. Confirmed `/login`, `/register`, `/my/properties`, and `/admin/properties` each returned HTTP
+    200 with the expected server-rendered heading, an initial-data payload of `null`, and no contact
+    number or access-token marker.
+17. Loaded all four routes directly in the browser and confirmed hydration produced no console
+    warnings or errors. Direct owner and Admin login reached their protected routes.
+18. Created and approved a disposable SQL-backed Property, confirmed its direct public SSR response
+    and hydrated page contained the title but no contact number or token marker, then soft-deleted
+    it and confirmed the public API returned `404`. UAT-04 is `PASS`.
 
 Remaining scenarios will receive the same evidence and a truthful `PASS` or `FAIL` only when
 implemented and manually executed.

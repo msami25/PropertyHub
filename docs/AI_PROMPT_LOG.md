@@ -79,7 +79,8 @@ registration, login, role enforcement, disabled accounts, and invalid tokens.
   uses a domain-specific repository, and EF Core alone handles persistence. Tests verify owner
   isolation, 401/403 behavior, inactive cities, duplicate prevention, moderation visibility,
   disabled-owner filtering, terminal Sold/Rented states, public-data privacy, and React journeys.
-  Live Docker evidence later confirmed those workflows while exposing a direct-route SSR failure.
+  Live Docker evidence later confirmed those workflows and exposed a direct-route SSR failure that
+  received a focused regression fix.
 
 ## Security
 
@@ -108,6 +109,20 @@ validation, per-request account-status checks, rate limiting, and safe Admin see
   Direct private-route requests returned HTTP 500 because the SSR serializer receives undefined
   public-page data. The UAT was therefore recorded as `FAIL`, and application code was left
   unchanged as requested.
+
+### 10. Fix direct-route SSR serialization
+
+- **Prompt:** Reproduce the direct `/login`, `/register`, `/my/properties`, and
+  `/admin/properties` Docker failures, trace the undefined value, implement the smallest SSR-safe
+  fix, add regression tests, rebuild only web, and rerun the affected UAT.
+- **Why it mattered:** Direct navigation and refresh are core frontend behavior even when hydrated
+  client navigation already works.
+- **Review:** The complete trace showed `loadPublicPageData` returned `undefined` for non-public
+  routes, which is not representable in the JSON transfer payload. The SSR boundary now converts
+  only that intentional absence to `null`; the strict serializer remains unchanged. Four direct SSR
+  regressions were added, 22 frontend tests and both builds passed, only the web container was
+  rebuilt, all direct responses returned 200, hydration had no console issues, and public SSR
+  remained free of contact numbers and tokens.
 
 ## Documentation
 
