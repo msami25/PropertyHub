@@ -58,7 +58,7 @@ describe("authentication routes", () => {
       </AuthProvider>
     );
 
-    expect(screen.getByRole("heading", { name: "Administration" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Admin dashboard" })).toBeInTheDocument();
   });
 
   it("keeps the token in memory and navigates after login", async () => {
