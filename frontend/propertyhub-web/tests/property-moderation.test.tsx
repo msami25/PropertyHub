@@ -35,6 +35,15 @@ const property = {
   rejectionReason: null,
   createdAtUtc: "2026-07-29T00:00:00Z",
   updatedAtUtc: "2026-07-29T00:00:00Z"
+  ,
+  images: [{
+    id: "image-id",
+    url: "/api/properties/property-id/images/image-id",
+    sortOrder: 1,
+    isPrimary: true,
+    contentType: "image/png",
+    fileSizeBytes: 100
+  }]
 };
 
 afterEach(() => vi.unstubAllGlobals());
@@ -47,21 +56,30 @@ function renderPage() {
 
 describe("property moderation", () => {
   it("approves pending properties with an Admin token", async () => {
-    const fetchMock = vi.fn()
-      .mockResolvedValueOnce(Response.json({ items: [property] }))
-      .mockResolvedValueOnce(Response.json({ ...property, moderationStatus: "Approved" }));
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/images/")) return new Response(new Blob(["image"], { type: "image/png" }));
+      if (init?.method === "POST") {
+        return Response.json({ ...property, moderationStatus: "Approved" });
+      }
+      return Response.json({ items: [property] });
+    });
     vi.stubGlobal("fetch", fetchMock);
     renderPage();
 
     await screen.findByRole("heading", { name: property.title });
     fireEvent.click(screen.getByRole("button", { name: "Approve" }));
     expect(await screen.findByText("Pending family house was approved.")).toBeInTheDocument();
-    expect(new Headers(fetchMock.mock.calls[1][1]?.headers).get("Authorization"))
+    const moderationCall = fetchMock.mock.calls.find(([, init]) => init?.method === "POST")!;
+    expect(new Headers(moderationCall[1]?.headers).get("Authorization"))
       .toBe("Bearer admin-token");
   });
 
   it("requires a reason before rejecting", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ items: [property] })));
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) =>
+      String(input).includes("/images/")
+        ? new Response(new Blob(["image"], { type: "image/png" }))
+        : Response.json({ items: [property] })));
     renderPage();
     await screen.findByRole("heading", { name: property.title });
 

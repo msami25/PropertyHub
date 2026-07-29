@@ -32,7 +32,8 @@ describe("PropertyHub application shell", () => {
         area: 10,
         areaUnit: "Marla",
         bedrooms: 4,
-        bathrooms: 4
+        bathrooms: 4,
+        primaryImageUrl: "/api/properties/property-id/images/image-id"
       }]
     })));
 
@@ -40,6 +41,7 @@ describe("PropertyHub application shell", () => {
 
     expect(html).toContain("SSR family home");
     expect(html).toContain("Lahore");
+    expect(html).toContain("/api/properties/property-id/images/image-id");
     expect(html).not.toContain("accessToken");
     expect(html).not.toContain("contactNumber");
   });

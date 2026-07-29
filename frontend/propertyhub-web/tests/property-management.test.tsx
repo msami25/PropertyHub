@@ -44,6 +44,7 @@ function managed(overrides: Partial<ManagedProperty> = {}): ManagedProperty {
     rejectionReason: null,
     createdAtUtc: "2026-07-29T00:00:00Z",
     updatedAtUtc: "2026-07-29T00:00:00Z",
+    images: [],
     ...overrides
   };
 }

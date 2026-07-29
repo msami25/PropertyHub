@@ -14,6 +14,8 @@ const summary = {
   areaUnit: "Marla" as const,
   bedrooms: 4,
   bathrooms: 4
+  ,
+  primaryImageUrl: "/api/properties/property-id/images/image-id"
 };
 
 afterEach(() => vi.unstubAllGlobals());
@@ -47,12 +49,22 @@ describe("public property pages", () => {
         ...summary,
         description: "A complete public description for this approved property.",
         address: "Model Town",
-        sellerDisplayName: "Property Owner"
+        sellerDisplayName: "Property Owner",
+        images: [{
+          id: "image-id",
+          url: "/api/properties/property-id/images/image-id",
+          sortOrder: 1,
+          isPrimary: true,
+          contentType: "image/png",
+          fileSizeBytes: 100
+        }]
       }
     }} /></AuthProvider>);
 
     expect(screen.getByRole("heading", { name: summary.title })).toBeInTheDocument();
     expect(screen.getByText("Property Owner")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: `${summary.title} primary image` }))
+      .toHaveAttribute("src", expect.stringContaining("/api/properties/property-id/images/image-id"));
     expect(screen.queryByText(/contact/i)).not.toBeInTheDocument();
   });
 
