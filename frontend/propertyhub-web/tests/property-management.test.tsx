@@ -82,6 +82,10 @@ describe("owner property management", () => {
     vi.stubGlobal("fetch", fetchMock);
     renderPage();
     await screen.findByText("You have not created a property yet.");
+    expect(screen.getByRole("group", { name: "Listing overview" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Location" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Pricing and dimensions" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Owner contact" })).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Family house in Lahore" } });
     fireEvent.change(screen.getByLabelText("Description"), {
@@ -95,12 +99,15 @@ describe("owner property management", () => {
     fireEvent.click(screen.getByRole("button", { name: "Create property" }));
 
     expect(await screen.findByText("Property created and submitted for moderation.")).toBeInTheDocument();
+    expect(screen.getByText("Pending")).toHaveClass("status-pending");
+    expect(screen.getByText("Available")).toHaveClass("status-available");
+    expect(screen.getByText(/25,000,000/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "Updated family house" } });
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     expect(await screen.findByText("Updated family house")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Mark sold" }));
-    expect(await screen.findByText("Sold")).toBeInTheDocument();
+    expect(await screen.findByText("Sold")).toHaveClass("status-sold");
     fireEvent.click(screen.getByRole("button", { name: "Delete Updated family house" }));
     await waitFor(() => expect(screen.queryByText("Updated family house")).not.toBeInTheDocument());
 
@@ -109,5 +116,36 @@ describe("owner property management", () => {
     expect(mutations.every(([, init]) =>
       new Headers(init?.headers).get("Authorization") === "Bearer user-token"
     )).toBe(true);
+  });
+
+  it("presents rejected and rented listing states with clear hierarchy", async () => {
+    const rejectedRental = managed({
+      id: "20000000-0000-4000-8000-000000000002",
+      title: "City apartment for rent",
+      purpose: "Rent",
+      propertyType: "Apartment",
+      price: 175000,
+      area: 1200,
+      areaUnit: "SquareFeet",
+      moderationStatus: "Rejected",
+      availabilityStatus: "Rented",
+      rejectionReason: "Please replace the unsupported property image."
+    });
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).endsWith("/api/cities")) return Response.json({ items: [city] });
+      return Response.json({ items: [rejectedRental] });
+    }));
+
+    renderPage();
+
+    expect(await screen.findByRole("heading", { name: "City apartment for rent" }))
+      .toBeInTheDocument();
+    expect(screen.getByText("Apartment for Rent")).toBeInTheDocument();
+    expect(screen.getByText("Rejected")).toHaveClass("status-rejected");
+    expect(screen.getByText("Rented")).toHaveClass("status-rented");
+    expect(screen.getByText("Please replace the unsupported property image."))
+      .toBeInTheDocument();
+    expect(screen.getByText(/175,000/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Mark rented" })).not.toBeInTheDocument();
   });
 });

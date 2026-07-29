@@ -40,8 +40,8 @@ describe("property image management", () => {
       "home.png",
       { type: "image/png" }
     );
-    fireEvent.change(screen.getByLabelText(/Add JPEG/), { target: { files: [file] } });
-    fireEvent.click(screen.getByRole("button", { name: "Upload images" }));
+    fireEvent.change(screen.getByLabelText("Add property images"), { target: { files: [file] } });
+    fireEvent.click(screen.getByRole("button", { name: "Upload 1 image" }));
 
     await waitFor(() => expect(onChanged).toHaveBeenCalledWith(result));
     const init = fetchMock.mock.calls[0][1] as RequestInit;

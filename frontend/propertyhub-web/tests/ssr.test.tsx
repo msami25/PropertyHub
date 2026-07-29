@@ -1,4 +1,4 @@
-import { render as renderDom, screen } from "@testing-library/react";
+import { fireEvent, render as renderDom, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../src/App";
 import { AuthProvider } from "../src/auth/AuthContext";
@@ -54,5 +54,11 @@ describe("PropertyHub application shell", () => {
     );
 
     expect(screen.getByRole("navigation", { name: "Primary navigation" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Properties" })).toHaveAttribute("aria-current", "page");
+    const menuButton = screen.getByRole("button", { name: "Open navigation menu" });
+    expect(menuButton).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(menuButton);
+    expect(screen.getByRole("button", { name: "Close navigation menu" }))
+      .toHaveAttribute("aria-expanded", "true");
   });
 });
