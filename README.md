@@ -27,6 +27,25 @@ React/Vite SSR
 Controllers must not use EF Core or repositories directly. The API is the only process allowed to
 access SQL Server and the uploads volume.
 
+## Frontend experience
+
+The React/Vite SSR frontend uses a shared CSS token system with a restrained black-and-gold visual
+language. The responsive navigation includes active-page treatment, an accessible mobile menu,
+styled account controls, a skip link, and visible keyboard focus. Public Property routes retain
+meaningful SSR content and browser hydration; authenticated data still loads only after an
+in-memory session exists.
+
+The owner workspace at `http://localhost:3000/my/properties` provides:
+
+- a grouped, responsive create/edit form with every existing Property field and validation rule;
+- clear loading, empty, success, validation, authorization, and server-error states;
+- responsive listing cards with price, City, type, purpose, moderation, and availability hierarchy;
+- accessible Pending, Approved, Rejected, Available, Sold, and Rented status badges;
+- unchanged edit, delete, Sold/Rented, image upload, primary-image, and refresh behavior.
+
+No Tailwind, component library, external font, or additional frontend runtime dependency is used.
+Motion is restrained and disabled through `prefers-reduced-motion` when requested.
+
 ## Prerequisites
 
 - Docker Desktop with Docker Compose

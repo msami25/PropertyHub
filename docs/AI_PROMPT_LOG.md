@@ -143,13 +143,17 @@ default.
 - **Review:** The root cause was absent public route data crossing a strict JSON transfer boundary;
   only that intentional absence is now represented as `null`. Hydration and privacy checks passed.
 
-### 17. Keep configured administrator secrets private
+### 17. Revamp the owner frontend without changing behavior
 
-- **Prompt:** Answer a request for the configured Admin password without exposing credentials.
-- **Impact:** Exercised the permanent rule that passwords and environment secrets must never appear
-  in chat, logs, documentation, or commits.
-- **Review:** The response directed the operator to their own `SeedAdmin__Password` configuration
-  and did not read or reveal the value.
+- **Prompt:** Redesign the shared navbar, My Properties page, and Add Property form as a responsive,
+  restrained black-and-gold experience while preserving every API call, field, validation rule,
+  protected route, image action, moderation state, CRUD behavior, SSR boundary, and hydration flow.
+- **Impact:** Improved the most important owner workflow without introducing Tailwind, a component
+  library, another large dependency, or frontend/backend contract drift.
+- **Review:** Shared CSS tokens match the approved palette; the navbar has active and mobile states;
+  semantic fieldsets group the unchanged form; listing cards retain every action and expose
+  accessible status hierarchy. Focused tests, both production builds, direct SSR privacy checks,
+  hydrated browser interaction, keyboard focus, console output, and overflow were reviewed.
 
 ## Docker and UAT
 
