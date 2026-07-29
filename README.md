@@ -5,10 +5,10 @@ Vite SSR, EF Core, SQL Server, and Docker Compose.
 
 ## Current status
 
-Phases 1 through 3 provide the layered foundation, JWT authentication and authorization, and the
-complete City vertical slice. Active cities are public reference data, while an active Admin can
-list, create, edit, activate/deactivate, and delete unused cities through the protected API and
-management UI. Property CRUD is the next mandatory slice.
+Phases 1 through 4 provide the layered foundation, JWT authentication and authorization, City CRUD,
+and Property CRUD with ownership, moderation, availability, and public visibility rules. Public
+property list and detail pages are server-rendered and hydrated; owners manage only their listings,
+and Admins approve or reject pending submissions.
 
 ## Architecture
 
@@ -77,6 +77,29 @@ Karachi, Islamabad, Rawalpindi, Faisalabad, Multan, Peshawar, and Quetta.
 After signing in as the configured Admin, open `http://localhost:3000/admin/cities` to use the City
 management UI.
 
+## Property API
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `GET` | `/api/properties` | Public; approved and available only |
+| `GET` | `/api/properties/{propertyId}` | Public; approved and available only |
+| `GET` | `/api/users/me/properties` | Active owner |
+| `GET` | `/api/users/me/properties/{propertyId}` | Active owner; owner-scoped |
+| `POST` | `/api/properties` | Active user |
+| `PUT` | `/api/properties/{propertyId}` | Active owner |
+| `PATCH` | `/api/properties/{propertyId}/availability` | Active owner |
+| `DELETE` | `/api/properties/{propertyId}` | Active owner |
+| `GET` | `/api/admin/properties` | Active Admin |
+| `POST` | `/api/admin/properties/{propertyId}/moderation` | Active Admin |
+
+New and edited listings are `Pending`. Admins may set `Approved` or `Rejected`; rejection requires a
+reason. Owners may mark sale listings `Sold` and rental listings `Rented`. Sold, rented,
+soft-deleted, unapproved, and disabled-owner listings are excluded from public results. Owner
+lookups are scoped by the authenticated user so another owner's identifier returns `404`.
+
+Essential public filters support City, purpose, and property type. Use `/my/properties` for owner
+management and `/admin/properties` for moderation.
+
 ## Foundation verification
 
 ```powershell
@@ -95,8 +118,9 @@ docker compose --env-file .env.example config --quiet
 
 The local application URL is `http://localhost:3000`, with the API at `http://localhost:8081`.
 Docker startup, automatic migrations, seeded roles/Admin/cities, and the Phase 2–3 authentication
-and City journeys have been verified. Complete Gate UAT remains pending until all mandatory slices
-are implemented.
+and City journeys were previously verified. Phase 4 host builds and automated tests pass, but its
+live Docker UAT remains blocked by a local Docker Desktop engine startup failure recorded in
+`docs/UAT_REPORT.md`.
 
 The final startup command will be:
 
@@ -112,5 +136,6 @@ acceptance results will be recorded in `docs/UAT_REPORT.md`.
 
 ## Known limitations
 
-See `docs/SCOPE_CUTS.md`. Property CRUD, image uploads, Open-Meteo, user administration, dashboard
-metrics, moderation, and enquiries remain future slices.
+See `docs/SCOPE_CUTS.md`. Property cards currently use an accessible placeholder because secure
+property images are Phase 5. Open-Meteo, user administration, dashboard metrics, contact reveal,
+and enquiries remain future slices.

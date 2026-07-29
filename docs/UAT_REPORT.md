@@ -2,14 +2,15 @@
 
 The complete Gate UAT remains `BLOCKED` until all mandatory phases are implemented and exercised.
 Phase 2 authentication and Phase 3 City CRUD were manually exercised against the Docker
-environment on 2026-07-28.
+environment on 2026-07-28. Phase 4 automated workflows pass, but live Docker execution is
+`BLOCKED` by Docker Desktop failing to initialize its engine on 2026-07-29.
 
 | ID | Scenario | Expected result | Actual result | Evidence | Status |
 |---|---|---|---|---|---|
 | UAT-01 | Register and log in | Active user receives a JWT and can enter protected routes | Registration returned 201, login returned 200, and `/api/auth/me` returned 200 | Docker HTTP probe; `AuthenticationEndpointTests` | PASS |
 | UAT-02 | Enforce authorization | Missing/invalid tokens return 401, User-to-Admin access returns 403, and disabled accounts cannot log in or reuse a token | Missing and invalid tokens returned 401; User-to-Admin, disabled login, and disabled existing token returned 403; seeded Admin access returned 200 | Docker HTTP/SQL probe; `AuthenticationEndpointTests` | PASS |
 | UAT-03 | Complete City CRUD | Admin lists, creates, edits, and deletes an unused City; referenced deletion returns 409 | Seeded Admin completed create/read/update/delete through Docker API and create/edit/delete through the browser UI; invalid input returned 400, duplicates and referenced deletion returned 409 | Docker HTTP/SQL and browser probes; `CityEndpointTests`; `CityServiceTests`; `city-management.test.tsx` | PASS |
-| UAT-04 | Complete Property CRUD | Owner creates, views, edits, marks availability, and deletes a listing | Not implemented | Pending | BLOCKED |
+| UAT-04 | Complete Property CRUD | Owner creates, views, edits, marks availability, and deletes a listing; Admin moderation controls public visibility | API and UI are implemented; 6 API integration, 6 service unit, and 7 focused frontend tests pass; live Docker journey was not executed because the Docker engine did not become responsive | `PropertyEndpointTests`; `PropertyServiceTests`; property frontend and SSR tests; Docker Desktop logs show control API timeouts | BLOCKED |
 | UAT-05 | Upload property images | Valid images persist and display; unsafe input is rejected | Not implemented | Pending | BLOCKED |
 | UAT-06 | Display Open-Meteo weather | Details show weather or a graceful unavailable state | Not implemented | Pending | BLOCKED |
 | UAT-07 | Manage users and metrics | Admin changes roles/status and sees live database counts | Not implemented | Pending | BLOCKED |
@@ -45,6 +46,20 @@ environment on 2026-07-28.
    reference, and confirmed deletion then returned 204.
 7. Repeated create, edit, and delete through the browser management UI and confirmed visible
    success states with no browser console warnings or errors.
+
+### UAT-04 automated evidence and Docker blocker
+
+1. Exercised owner create, read, edit, availability, and soft-delete workflows through the
+   integration host.
+2. Confirmed another owner receives `404`, missing authentication receives `401`, and a
+   non-Admin receives `403` on moderation operations.
+3. Confirmed pending and rejected properties are not public; approval makes an available property
+   public; sold properties and properties owned by disabled accounts disappear from public data.
+4. Confirmed public SSR includes property content but not owner contact data.
+5. Validated the Compose model successfully with `.env.example`.
+6. Attempted Docker engine recovery through Docker Desktop restart and a Docker-only WSL VM
+   restart. New sessions remained in `starting`; engine `_ping` and init control API calls timed
+   out. No live Phase 4 Docker request was possible, so UAT-04 remains `BLOCKED`.
 
 Remaining scenarios will receive the same evidence and a truthful `PASS` or `FAIL` only when
 implemented and manually executed.

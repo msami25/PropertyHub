@@ -13,6 +13,7 @@ deferrals that protect mandatory delivery.
 | Complex immutable audit infrastructure | DEFERRED | Not needed for initial Gate evidence | None | Add focused audit records later |
 | Background image cleanup | DEFERRED | Secure storage and access control come first | None | Add retention processing later |
 | Cloud hosting/storage | DEFERRED | Project must run locally | None | Consider only outside this capstone |
+| Rejected-listing correction workflow | DEFERRED | Owners can edit a rejected listing, which returns it to Pending; a separate correction state is not required by the Gate | None | Add review comments/history after mandatory workflows pass |
 
-Moderation, contact reveal, and enquiries are sequenced after generic Gate stability; they are not
-declared permanent scope cuts.
+Contact reveal and enquiries are sequenced after mandatory Gate stability. Property moderation is
+implemented in Phase 4 and is not a scope cut.

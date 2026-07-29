@@ -69,6 +69,18 @@ registration, login, role enforcement, disabled accounts, and invalid tokens.
   exercises the same flow through unit, integration, React, Docker API, SQL Server, and browser UI
   checks.
 
+### 8. Implement Property CRUD as the next Gate vertical slice
+
+- **Prompt:** Implement Phase 4 according to the canonical Gate and permanent agent guide.
+- **Why it mattered:** Authorized the owner-scoped Property workflow, separate moderation and
+  availability lifecycles, public SSR pages, Admin moderation, and end-to-end automated evidence
+  without starting image uploads.
+- **Review:** Controllers call the Property service, the service enforces business transitions and
+  uses a domain-specific repository, and EF Core alone handles persistence. Tests verify owner
+  isolation, 401/403 behavior, inactive cities, duplicate prevention, moderation visibility,
+  disabled-owner filtering, terminal Sold/Rented states, public-data privacy, and React journeys.
+  Docker evidence remains honestly blocked by the local engine rather than being marked passed.
+
 ## Security
 
 The Phase 2 implementation prompt established short-lived signed JWTs, strict issuer/audience/key
