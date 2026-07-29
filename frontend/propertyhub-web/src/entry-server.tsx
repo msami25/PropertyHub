@@ -1,11 +1,14 @@
 import { renderToString } from "react-dom/server";
 import { App } from "./App";
 import { AuthProvider } from "./auth/AuthContext";
+import { loadPublicPageData } from "./ssrData";
 
-export function render(url: string) {
-  return renderToString(
+export async function render(url: string) {
+  const initialPublicData = await loadPublicPageData(url);
+  const html = renderToString(
     <AuthProvider>
-      <App url={url} />
+      <App url={url} initialPublicData={initialPublicData} />
     </AuthProvider>
   );
+  return { html, initialPublicData };
 }

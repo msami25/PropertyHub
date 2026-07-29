@@ -47,11 +47,18 @@ form {
 }
 
 input,
+select,
+textarea,
 button {
   border: 1px solid #aeb8c8;
   border-radius: 0.4rem;
   font: inherit;
   padding: 0.7rem;
+}
+
+textarea {
+  min-height: 7rem;
+  resize: vertical;
 }
 
 input[type="checkbox"] {
@@ -121,6 +128,93 @@ button:disabled {
 
 .table-scroll {
   overflow-x: auto;
+}
+
+.filter-form {
+  max-width: none;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  align-items: end;
+}
+
+.card-grid,
+.moderation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+
+.property-card {
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #dce2ec;
+  border-radius: 0.6rem;
+}
+
+.card-content {
+  padding: 1.25rem;
+}
+
+.image-placeholder {
+  display: grid;
+  min-height: 10rem;
+  place-items: center;
+  color: #667085;
+  background: #e9eef7;
+  font-weight: 700;
+}
+
+.detail-image {
+  min-height: 20rem;
+  margin-top: 2rem;
+  border-radius: 0.6rem;
+}
+
+.eyebrow {
+  color: #475467;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lead {
+  color: #475467;
+  font-size: 1.1rem;
+}
+
+.property-details dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 1rem;
+}
+
+.property-details dt {
+  color: #475467;
+  font-size: 0.85rem;
+}
+
+.property-details dd {
+  margin: 0.25rem 0 0;
+  font-weight: 700;
+}
+
+@media (max-width: 48rem) {
+  header,
+  nav,
+  .page-heading,
+  .button-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  header {
+    gap: 1rem;
+  }
+
+  main {
+    padding-top: 2rem;
+  }
 }
 
 table {

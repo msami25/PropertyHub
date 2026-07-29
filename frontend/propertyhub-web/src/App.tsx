@@ -3,6 +3,11 @@ import { useAuth } from "./auth/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { CityManagementPage } from "./pages/CityManagementPage";
+import { MyPropertiesPage } from "./pages/MyPropertiesPage";
+import { PropertyDetailPage } from "./pages/PropertyDetailPage";
+import { PropertyListPage } from "./pages/PropertyListPage";
+import { PropertyModerationPage } from "./pages/PropertyModerationPage";
+import type { PublicPageData } from "./ssrData";
 
 function FoundationPage({ title }: Readonly<{ title: string }>) {
   return (
@@ -33,7 +38,12 @@ function ClientLink({
   );
 }
 
-export function App({ url = "/" }: Readonly<{ url?: string }>) {
+interface AppProps {
+  url?: string;
+  initialPublicData?: PublicPageData;
+}
+
+export function App({ url = "/", initialPublicData }: Readonly<AppProps>) {
   const initialUrl = new URL(url, "http://propertyhub.local");
   const [location, setLocation] = useState(`${initialUrl.pathname}${initialUrl.search}`);
   const { session, logout } = useAuth();
@@ -54,17 +64,43 @@ export function App({ url = "/" }: Readonly<{ url?: string }>) {
 
   function renderPage() {
     const pathname = currentUrl.pathname;
-    if (pathname === "/") return <FoundationPage title="Find your next property" />;
-    if (pathname === "/properties") return <FoundationPage title="Properties" />;
-    if (/^\/properties\/[^/]+$/.test(pathname)) return <FoundationPage title="Property details" />;
+    if (pathname === "/" || pathname === "/properties") {
+      return (
+        <PropertyListPage
+          initialItems={initialPublicData?.kind === "property-list" ? initialPublicData.items : undefined}
+          navigate={navigate}
+        />
+      );
+    }
+    const propertyMatch = /^\/properties\/([^/]+)$/.exec(pathname);
+    if (propertyMatch) {
+      return (
+        <PropertyDetailPage
+          propertyId={propertyMatch[1]}
+          initialProperty={initialPublicData?.kind === "property-detail"
+            ? initialPublicData.property
+            : undefined}
+        />
+      );
+    }
     if (pathname === "/login") {
       return <LoginPage returnUrl={currentUrl.searchParams.get("returnUrl")} navigate={navigate} />;
     }
     if (pathname === "/register") return <RegisterPage />;
     if (pathname === "/my" || pathname.startsWith("/my/")) {
-      return session
-        ? <FoundationPage title="My PropertyHub" />
-        : <FoundationPage title="Sign in required" />;
+      if (!session) return <FoundationPage title="Sign in required" />;
+      if (pathname === "/my/properties" || pathname === "/my") {
+        return (
+          <MyPropertiesPage
+            accessToken={session.accessToken}
+            onSessionExpired={() => {
+              logout();
+              navigate("/login?returnUrl=/my/properties");
+            }}
+          />
+        );
+      }
+      return <FoundationPage title="Page not found" />;
     }
     if (pathname === "/admin" || pathname.startsWith("/admin/")) {
       if (!session) return <FoundationPage title="Sign in required" />;
@@ -76,6 +112,17 @@ export function App({ url = "/" }: Readonly<{ url?: string }>) {
             onSessionExpired={() => {
               logout();
               navigate("/login?returnUrl=/admin/cities");
+            }}
+          />
+        );
+      }
+      if (pathname === "/admin/properties") {
+        return (
+          <PropertyModerationPage
+            accessToken={session.accessToken}
+            onSessionExpired={() => {
+              logout();
+              navigate("/login?returnUrl=/admin/properties");
             }}
           />
         );
@@ -93,8 +140,12 @@ export function App({ url = "/" }: Readonly<{ url?: string }>) {
           <ClientLink href="/properties" navigate={navigate}>Properties</ClientLink>
           {session ? (
             <>
+              <ClientLink href="/my/properties" navigate={navigate}>My properties</ClientLink>
               {session.user.role === "Admin" && (
-                <ClientLink href="/admin/cities" navigate={navigate}>Cities</ClientLink>
+                <>
+                  <ClientLink href="/admin/properties" navigate={navigate}>Moderation</ClientLink>
+                  <ClientLink href="/admin/cities" navigate={navigate}>Cities</ClientLink>
+                </>
               )}
               <ClientLink href={session.user.role === "Admin" ? "/admin" : "/my"} navigate={navigate}>
                 {session.user.fullName}
