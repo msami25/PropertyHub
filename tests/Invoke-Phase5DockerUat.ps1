@@ -48,6 +48,9 @@ function Import-ComposeEnvironment($apiEnvironment) {
     $apiNames = @(
         "ConnectionStrings__DefaultConnection",
         "ImageStorage__RootPath",
+        "OpenMeteo__BaseUrl",
+        "OpenMeteo__TimeoutSeconds",
+        "OpenMeteo__CacheMinutes",
         "Jwt__Issuer",
         "Jwt__Audience",
         "Jwt__SigningKey",
