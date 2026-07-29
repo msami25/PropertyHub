@@ -11,6 +11,21 @@ export interface PropertyCity {
   name: string;
 }
 
+export interface PropertyImage {
+  id: string;
+  url: string;
+  sortOrder: number;
+  isPrimary: boolean;
+  contentType: string;
+  fileSizeBytes: number;
+}
+
+export interface PropertyImagesResponse {
+  propertyId: string;
+  images: PropertyImage[];
+  moderationStatus: ModerationStatus;
+}
+
 export interface PropertySummary {
   id: string;
   title: string;
@@ -22,12 +37,14 @@ export interface PropertySummary {
   areaUnit: AreaUnit;
   bedrooms: number | null;
   bathrooms: number | null;
+  primaryImageUrl: string | null;
 }
 
-export interface PropertyDetail extends PropertySummary {
+export interface PropertyDetail extends Omit<PropertySummary, "primaryImageUrl"> {
   description: string;
   address: string;
   sellerDisplayName: string;
+  images: PropertyImage[];
 }
 
 export interface ManagedProperty extends Omit<PropertyDetail, "sellerDisplayName"> {
@@ -37,6 +54,7 @@ export interface ManagedProperty extends Omit<PropertyDetail, "sellerDisplayName
   rejectionReason: string | null;
   createdAtUtc: string;
   updatedAtUtc: string;
+  images: PropertyImage[];
 }
 
 export interface PropertyInput {
@@ -87,7 +105,9 @@ async function request<T>(
     ...init,
     headers: {
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...(init.body ? { "Content-Type": "application/json" } : {}),
+      ...(init.body && !(init.body instanceof FormData)
+        ? { "Content-Type": "application/json" }
+        : {}),
       ...init.headers
     }
   });
@@ -168,6 +188,55 @@ export function deleteProperty(accessToken: string, propertyId: string) {
     accessToken,
     init: { method: "DELETE" }
   });
+}
+
+export function propertyImageUrl(relativeUrl: string) {
+  return `${getApiBaseUrl(false)}${relativeUrl}`;
+}
+
+export function uploadPropertyImages(
+  accessToken: string,
+  propertyId: string,
+  images: File[]
+) {
+  const form = new FormData();
+  images.forEach(image => form.append("images", image));
+  return request<PropertyImagesResponse>(`/api/properties/${propertyId}/images`, {
+    accessToken,
+    init: { method: "POST", body: form }
+  });
+}
+
+export function setPrimaryPropertyImage(
+  accessToken: string,
+  propertyId: string,
+  imageId: string
+) {
+  return request<PropertyImagesResponse>(
+    `/api/properties/${propertyId}/images/${imageId}/primary`,
+    { accessToken, init: { method: "PUT" } }
+  );
+}
+
+export function deletePropertyImage(
+  accessToken: string,
+  propertyId: string,
+  imageId: string
+) {
+  return request<PropertyImagesResponse>(
+    `/api/properties/${propertyId}/images/${imageId}`,
+    { accessToken, init: { method: "DELETE" } }
+  );
+}
+
+export async function getProtectedPropertyImage(accessToken: string, relativeUrl: string) {
+  const response = await fetch(propertyImageUrl(relativeUrl), {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  if (!response.ok) {
+    throw new PropertyApiError("The property image could not be loaded.", response.status);
+  }
+  return response.blob();
 }
 
 export async function listPropertiesForModeration(

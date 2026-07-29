@@ -6,6 +6,7 @@ import {
   type ManagedProperty,
   type ModerationStatus
 } from "../api/propertyApi";
+import { ProtectedPropertyImage } from "../components/ProtectedPropertyImage";
 
 interface PropertyModerationPageProps {
   accessToken: string;
@@ -95,6 +96,16 @@ export function PropertyModerationPage({
           : properties.length === 0 ? <p>No properties match this moderation status.</p>
           : <div className="moderation-grid">{properties.map(property =>
             <article className="property-card" key={property.id}>
+              <div className="image-strip moderation-images">
+                {property.images.length === 0
+                  ? <p className="error">No images uploaded. This listing cannot be approved.</p>
+                  : property.images.map(image => <ProtectedPropertyImage
+                      key={image.id}
+                      accessToken={accessToken}
+                      url={image.url}
+                      alt={`${property.title}${image.isPrimary ? " primary image" : " property image"}`}
+                    />)}
+              </div>
               <div className="card-content">
                 <p className="eyebrow">{property.moderationStatus} · {property.availabilityStatus}</p>
                 <h3>{property.title}</h3>

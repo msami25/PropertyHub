@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import {
   listActiveCities,
   listPublicProperties,
+  propertyImageUrl,
   type ActiveCity,
   type PropertyFilters,
   type PropertyPurpose,
@@ -109,7 +110,10 @@ export function PropertyListPage({ initialItems, navigate }: Readonly<PropertyLi
         <div className="card-grid">
           {items.map(property => (
             <article className="property-card" key={property.id}>
-              <div className="image-placeholder" aria-label="Property image coming soon">PropertyHub</div>
+              {property.primaryImageUrl
+                ? <img className="property-card-image" src={propertyImageUrl(property.primaryImageUrl)}
+                    alt={`${property.title} primary image`} />
+                : <div className="image-placeholder">PropertyHub</div>}
               <div className="card-content">
                 <p className="eyebrow">{property.propertyType} for {property.purpose}</p>
                 <h2>

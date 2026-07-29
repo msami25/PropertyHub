@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { getPublicProperty, type PropertyDetail } from "../api/propertyApi";
+import {
+  getPublicProperty,
+  propertyImageUrl,
+  type PropertyDetail
+} from "../api/propertyApi";
 
 interface PropertyDetailPageProps {
   propertyId: string;
@@ -30,7 +34,14 @@ export function PropertyDetailPage({
       <p className="eyebrow">{property.propertyType} for {property.purpose}</p>
       <h1>{property.title}</h1>
       <p className="lead">{property.address}, {property.city.name}</p>
-      <div className="image-placeholder detail-image" aria-label="Property image coming soon">PropertyHub</div>
+      <div className="property-gallery">
+        {property.images.map(image => <img
+          key={image.id}
+          className={image.isPrimary ? "detail-image primary-image" : "detail-image"}
+          src={propertyImageUrl(image.url)}
+          alt={`${property.title}${image.isPrimary ? " primary image" : " property image"}`}
+        />)}
+      </div>
       <section className="panel property-details" aria-labelledby="property-description">
         <h2 id="property-description">Property details</h2>
         <p>{property.description}</p>

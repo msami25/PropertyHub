@@ -14,6 +14,7 @@ import {
   type PropertyPurpose,
   type PropertyType
 } from "../api/propertyApi";
+import { PropertyImagesManager } from "../components/PropertyImagesManager";
 
 interface MyPropertiesPageProps {
   accessToken: string;
@@ -184,6 +185,20 @@ export function MyPropertiesPage({
     }
   }
 
+  function updateImages(
+    propertyId: string,
+    result: import("../api/propertyApi").PropertyImagesResponse
+  ) {
+    setProperties(current => current.map(property => property.id === propertyId
+      ? {
+          ...property,
+          images: result.images,
+          moderationStatus: result.moderationStatus
+        }
+      : property));
+    setMessage("Property images were updated and moderation is pending.");
+  }
+
   return (
     <main id="main-content">
       <div className="page-heading">
@@ -270,7 +285,17 @@ export function MyPropertiesPage({
           : <div className="table-scroll"><table>
             <thead><tr><th>Property</th><th>Moderation</th><th>Availability</th><th>Actions</th></tr></thead>
             <tbody>{properties.map(property => <tr key={property.id}>
-              <td><strong>{property.title}</strong><br />{property.city.name}</td>
+              <td><strong>{property.title}</strong><br />{property.city.name}
+                <PropertyImagesManager
+                  propertyId={property.id}
+                  propertyTitle={property.title}
+                  accessToken={accessToken}
+                  images={property.images}
+                  canEdit={property.availabilityStatus === "Available"}
+                  onChanged={result => updateImages(property.id, result)}
+                  onSessionExpired={onSessionExpired}
+                />
+              </td>
               <td>{property.moderationStatus}
                 {property.rejectionReason && <span className="error"><br />{property.rejectionReason}</span>}</td>
               <td>{property.availabilityStatus}</td>
