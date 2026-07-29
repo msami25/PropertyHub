@@ -1,248 +1,356 @@
-# PropertyHub Loom Video Scripts
+# PropertyHub Loom Recording Guide and Scripts
 
-These scripts reflect the completed implementation on `feature/core-implementation` and the
-evidence generated on 2026-07-29. They target seven to eight minutes each at a natural speaking
-pace. Rehearse once and keep transitions between prepared tabs short.
+The two recordings are external submission deliverables. They have not been recorded, and no URL
+is claimed in this repository.
 
-## Video 1: Technical Walkthrough
+- Technical walkthrough link after recording: `LOOM_TECHNICAL_URL_PENDING`
+- Non-technical demo link after recording: `LOOM_DEMO_URL_PENDING`
 
-**Target duration:** 7 minutes 55 seconds
-**Gate limit:** 15 minutes
+The scripts use only implemented behavior and retained evidence. Speak at a calm conversational
+pace, follow the prepared screen sequence, and do not pause to troubleshoot during a recording.
 
-### Prepare before recording
+## Shared preparation
 
-Open these tabs or editor files in this order:
+Before either recording:
 
-1. `README.md` at the project summary and architecture sections.
-2. The repository tree with `backend`, `frontend`, `tests`, and `docs` expanded.
-3. `PropertiesController.cs`, `PropertyService.cs`, `IPropertyRepository.cs`, and
-   `PropertyRepository.cs`.
-4. `ApplicationDbContext.cs`, the domain entity folder, the two status enums, the configuration
-   folder, and the migrations folder.
-5. `AuthenticationExtensions.cs`, `ActiveUserAuthorizationHandler.cs`, and
-   `AdminService.cs`.
-6. `PropertyImageValidator.cs` and `LocalImageStorage.cs`.
-7. `App.tsx`, `entry-server.tsx`, `ssrData.ts`, and the frontend `api` folder.
-8. `OpenMeteoWeatherClient.cs` and `PropertyWeatherService.cs`.
-9. `PropertyServiceTests.cs`, `AuthenticationEndpointTests.cs`,
-   `PropertyImageEndpointTests.cs`, `OpenMeteoWeatherClientTests.cs`, and
-   `AdminEndpointTests.cs`.
-10. `docs/coverage/index.html`, `docs/UAT_REPORT.md`, `docs/GATE_REPORT.md`, and
-    `docker-compose.yml`.
-11. A terminal containing only a recent successful `docker compose ps` result.
+1. Start PropertyHub with `docker compose up --build` and wait for SQL Server, API, and web to be
+   healthy.
+2. Open `http://localhost:3000` and confirm one approved, Available listing has an image and
+   weather details.
+3. Close `.env`, password managers, database tools, Swagger, browser developer tools, email,
+   notifications, and unrelated tabs.
+4. Use a clean browser profile and a neutral desktop background. Hide bookmarks and account
+   avatars that reveal private information.
+5. Set browser zoom to 100%, terminal font to a readable size, and repository secrets to hidden.
+6. Run one complete dry run and time it. Shorten pauses, not required content.
 
-Collapse side panels that could display environment-variable values. Increase the editor and
-browser zoom enough for file names and selected code to be readable.
+Never display passwords, the JWT signing key, access tokens, authorization headers, password
+hashes, SQL credentials, Admin seed values, `.env`, or real contact information.
 
-### Pre-recording checklist
+---
 
-- Start the stack with `docker compose up --build` and confirm SQL Server, API, and web are healthy.
-- Confirm `http://localhost:3000` and the committed HTML coverage report both open.
-- Keep the terminal working directory at the repository root.
-- Close `.env`, `appsettings.Development.json`, browser developer storage, request headers, and any
-  terminal history containing credentials.
-- Do not open generated JWTs, Identity password hashes, connection strings, seed Admin credentials,
-  or uploaded files by their physical host path.
-- Do not imply that deferred contact reveal, enquiries, favourites, MailHog, or cloud deployment
-  are implemented.
+## Video 1 — Technical Walkthrough
+
+**Target duration:** 11 minutes 40 seconds
+
+**Assessment requirement:** 10–15 minutes
+**Audience:** Technical reviewer
+
+### Prepare these tabs and files
+
+Open in this order before recording:
+
+1. Root [`README.md`](../README.md), positioned at the architecture diagram.
+2. Repository tree with `src`, `frontend`, `tests`, `adr`, and `docs` visible.
+3. [`docs/ARCHITECTURE.md`](ARCHITECTURE.md).
+4. [`adr/README.md`](../adr/README.md) and ADRs 0001, 0002, and 0003.
+5. `frontend/propertyhub-web/src/pages/MyPropertiesPage.tsx` and
+   `frontend/propertyhub-web/src/api/propertyApi.ts`.
+6. `backend/PropertyHub.Api/Controllers/PropertiesController.cs`.
+7. `backend/PropertyHub.Application/Services/PropertyService.cs` and
+   `backend/PropertyHub.Application/Interfaces/Repositories/IPropertyRepository.cs`.
+8. `backend/PropertyHub.Infrastructure/Data/Repositories/PropertyRepository.cs` and
+   `backend/PropertyHub.Infrastructure/Data/ApplicationDbContext.cs`.
+9. Domain entities/enums and the migrations folder.
+10. Authentication, active-user authorization, image validation/storage, SSR, and weather files.
+11. Representative backend and frontend test files.
+12. [`docs/coverage/index.html`](coverage/index.html), [`uat-report.md`](../uat-report.md), and
+    [`ai-collaboration-log.md`](../ai-collaboration-log.md).
+13. A terminal showing only `docker compose ps`; clear command history first.
+
+Do not open raw Cobertura XML during the recording. The HTML coverage report is safer and easier to
+read.
 
 ### Timestamped word-for-word script
 
-#### 0:00-0:40 — Product and business problem
+#### 0:00–0:50 — Product and business problem
 
-**Show:** `README.md`, title and current-status sections.
-
-**Say:**
-
-“PropertyHub is a locally deployed, multi-user property marketplace. It solves a simple trust and
-workflow problem: owners need to publish and manage sale or rental listings, visitors need to
-discover only valid and currently available properties, and administrators need to control
-quality and account access. The completed Gate implementation uses a .NET 8 Web API, React 19 with
-Vite server-side rendering and hydration, Entity Framework Core, SQL Server, JWT authentication,
-Open-Meteo, and Docker Compose. The core Gate journeys are implemented and verified; broader
-features such as enquiries and favourites are deliberately documented as deferred.”
-
-#### 0:40-1:25 — Repository and layered solution
-
-**Show:** Repository tree, then the architecture diagram in `README.md`.
+**Show:** README title, status, and value proposition.
 
 **Say:**
 
-“The solution is divided by responsibility. The API project owns HTTP endpoints, authentication
-configuration, middleware, and health checks. The Application project contains DTOs, use-case
-services, validation, and repository interfaces. Domain contains the entities, enums, roles, and
-domain exceptions. Infrastructure contains Identity, Entity Framework configurations and
-repositories, local file storage, and the Open-Meteo client. The React application and its Vitest
-suite live under `frontend`, while xUnit unit and integration projects live under `tests`.
-Submission evidence, including UAT and coverage, is committed under `docs`.”
+“PropertyHub is a locally deployed, multi-user property marketplace built for the capstone Gate.
+It addresses a trust problem in informal property advertising: visitors need useful listings,
+owners need a straightforward way to manage them, and administrators need to control both content
+and platform access. Registered users create and maintain sale or rental listings, upload images,
+and control whether a listing is Available, Sold, or Rented. Administrators moderate listings,
+manage Cities and accounts, and see live database metrics. Public visitors see only approved,
+active results. The completed solution uses .NET 8, React 19 with Vite server-side rendering,
+SQL Server, Open-Meteo, and Docker Compose.”
 
-#### 1:25-2:10 — Controllers, services, repositories, and EF Core
+#### 0:50–1:40 — Repository structure
 
-**Show:** `PropertiesController.cs`, then `PropertyService.cs`, `IPropertyRepository.cs`, and
-`PropertyRepository.cs`.
-
-**Say:**
-
-“Every application request follows Controllers to Services to domain-specific Repositories to
-Entity Framework Core. For example, PropertiesController handles routes, claims, request DTOs, and
-HTTP results. PropertyService owns validation, ownership, moderation, availability, and mapping.
-IPropertyRepository exposes only Property persistence operations that the use cases need, and
-PropertyRepository implements those queries with Entity Framework. City, images, authentication,
-and Admin user management use their own focused repositories. Controllers never access the
-DbContext directly, and the DbContext remains the unit of work.”
-
-#### 2:10-3:15 — Database model, migrations, and statuses
-
-**Show:** `ApplicationDbContext.cs`, entity files, configurations, enums, then migration filenames.
+**Show:** Repository tree; expand `src`, `frontend`, `tests`, `adr`, and `docs`.
 
 **Say:**
 
-“ApplicationDbContext extends the Identity DbContext and includes Cities, SellerProfiles,
-Properties, PropertyImages, and UserStatusChanges. An ApplicationUser has Identity credentials,
-an account status, and a token version. A user can have one SellerProfile, a SellerProfile owns
-many Properties, each Property belongs to one City, and a Property has ordered images. Restrict
-delete behavior protects referenced users, cities, properties, and audit history.
+“The repository is organized around clear responsibilities. Under `src`, the API project owns HTTP
+controllers, middleware, authentication configuration, startup, and health endpoints. Application
+contains request and response records, validation, use-case services, and repository contracts.
+Domain contains entities, enums, role names, and domain exceptions. Infrastructure contains the
+Identity and Entity Framework implementation, entity configurations, migrations, repositories,
+local image storage, and the Open-Meteo client.
 
-“Moderation and availability are intentionally separate. ModerationStatus is Pending, Approved,
-or Rejected. AvailabilityStatus is Available, Sold, or Rented. Public queries require an approved,
-available, non-deleted listing whose owner is active. Properties also retain moderator, moderation
-time, rejection reason, and UTC timestamps. User enable and disable operations create immutable
-UserStatusChange audit records with the target, Admin, previous and new status, reason, correlation
-identifier, and UTC time. The migrations show the initial schema, canonical City seed data,
-Property workflow fields, image dimensions, and Admin user management.”
+“The React SSR application and Vitest tests are under `frontend`. Backend unit and integration
+projects are under `tests`. The root ADR folder records important decisions. The docs folder holds
+the canonical Gate, detailed UAT, scope decisions, coverage evidence, and these recording scripts.
+That separation makes the implementation and its proof easy to navigate.”
 
-#### 3:15-4:30 — Authentication, authorization, Admin safety, and images
+#### 1:40–2:35 — Architecture and decisions
 
-**Show:** `AuthenticationExtensions.cs`, `ActiveUserAuthorizationHandler.cs`, `AdminService.cs`,
-then `PropertyImageValidator.cs` and `LocalImageStorage.cs`.
+**Show:** Mermaid overview in `docs/ARCHITECTURE.md`, then the ADR index and ADR 0001.
 
 **Say:**
 
-“Registration and login use ASP.NET Core Identity. Public registration always creates a User;
-User and Admin roles and the configured Admin are seeded at startup. JWT validation deliberately
-checks issuer, audience, signature, lifetime, and zero clock skew. The browser holds its
-30-minute access token only in React memory.
+“This Mermaid diagram shows the deployed and logical architecture. The browser receives HTML from
+the React and Vite SSR container and hydrates the same React application. Both SSR and browser API
+clients call the ASP.NET Core container; neither frontend process accesses SQL Server. The API
+coordinates SQL Server, protected image storage, and Open-Meteo. Docker provides a private network,
+health-gated startup, and separate persistent volumes for database data and uploaded files.
 
-“Protected policies do more than validate a token. ActiveUserAuthorizationHandler checks the
-account status and token version against the database on every protected request. Disabling an
-account or changing its role increments that version, immediately invalidating older tokens.
-Admin operations block self-disable and self-demotion, prevent disabling an Admin through user
-management, and protect the last active Admin.
+“Architecture decisions are recorded rather than left implicit. ADR 0001 chooses the required
+Controller, Service, domain-specific Repository, Entity Framework flow. ADR 0002 relates that
+layering to JWT authorization and immediate token invalidation. ADR 0003 explains why images are
+outside the public web root. ADRs also cover public-route SSR and resilient weather integration.
+Each uses the same Title, Status, Context, Decision, and Consequences structure, including the
+trade-offs we accepted.”
 
-“Images are stored outside the web root and streamed through controlled endpoints. Uploads are
-owner-scoped and limited to one through five JPEG, PNG, or WebP files of at most five megabytes.
-The server validates extension, MIME type, file signature, decoding, dimensions, and pixel count,
-then generates collision-resistant storage names. Path resolution blocks traversal, and Docker
-persists the files in a named volume.”
+#### 2:35–4:05 — One complete React-to-database flow
 
-#### 4:30-5:15 — React routes and SSR
-
-**Show:** `App.tsx`, `entry-server.tsx`, `ssrData.ts`, then the frontend `api` folder.
+**Show:** In sequence: `MyPropertiesPage.tsx`, frontend properties API module,
+`PropertiesController.cs`, `PropertyService.cs`, `IPropertyRepository.cs`,
+`PropertyRepository.cs`, and `ApplicationDbContext.cs`.
 
 **Say:**
 
-“The frontend has dedicated API client modules and never accesses SQL Server. Public routes are
-slash, slash properties, and slash properties slash property ID. The Node Vite server fetches
-public DTOs, renders meaningful HTML, serializes only public initial data, and React hydrates that
-markup in the browser. Login, registration, My Properties, the Admin dashboard, moderation, and
-City management use client behavior. Protected data is loaded only after an in-memory session
-exists, so owner contact data, Admin data, and access tokens are not emitted into SSR HTML. Both
-direct requests and hydrated navigation are covered by regression tests.”
+“Here is one complete vertical flow: an owner edits a Property. My Properties renders the existing
+data, collects the unchanged contract fields, shows validation and submission states, and calls
+the dedicated frontend Property API client. That client sends the authenticated HTTP request to
+the Property endpoint; React never knows anything about database connections.
 
-#### 5:15-6:00 — Open-Meteo integration
+“PropertiesController is the HTTP boundary. It applies authorization, reads the authenticated user
+identifier, accepts the DTO and cancellation token, and maps the service result to the correct
+HTTP response. It contains no Entity Framework query.
 
-**Show:** `PropertyWeatherService.cs`, then `OpenMeteoWeatherClient.cs`.
+“PropertyService is the use-case boundary. It validates the requested City and domain values,
+loads the owner-scoped listing, enforces ownership, applies material changes, returns an edited
+approved listing to Pending moderation, and maps the entity to a response DTO. It depends on the
+domain-specific `IPropertyRepository`, not on the DbContext.
 
-**Say:**
+“PropertyRepository implements only the persistence operations this domain needs. It scopes owner
+queries, projects public results, loads required relationships, uses no-tracking reads where
+appropriate, and saves through ApplicationDbContext. Entity Framework then generates parameterized
+SQL for SQL Server. The DbContext is the unit of work. This exact dependency direction also applies
+to City, images, authentication, and Admin management, while keeping each repository focused
+instead of introducing a ceremonial generic repository.”
 
-“Weather is meaningful property-location data rather than a disconnected API demo. The weather
-service first loads a publicly visible Property and uses its City’s stored latitude and longitude.
-A typed HttpClient created by HttpClientFactory calls Open-Meteo with a configurable timeout,
-clamped to a safe range and set to five seconds by default. Successful observations are cached by
-City for 30 minutes. Non-success responses, timeouts, network errors, malformed JSON, and invalid
-measurements return a provider-neutral unavailable result. The Property page remains usable even
-when weather is unavailable.”
+#### 4:05–5:05 — Data model, relationships, migrations, and states
 
-**Fallback if live weather is unavailable:**
-
-“The provider is unavailable at this moment, and this is the designed fallback: Property details
-remain available, the endpoint returns a safe unavailable result, and failures are not cached.”
-
-#### 6:00-6:55 — Representative tests and coverage
-
-**Show:** The prepared unit and integration test files, then `docs/coverage/index.html`.
+**Show:** Architecture ER diagram, entity files, status enums, then the five migration filenames.
 
 **Say:**
 
-“The backend suite contains 38 unit tests and 41 integration tests, for 79 backend tests in total.
-The current frontend suite contains 31 Vitest tests. Representative service tests cover Property
-validation, Pending transitions, moderation, terminal Sold and Rented behavior, weather fallback,
-and unsafe Admin actions. Integration tests exercise registration and JWTs, verified 401 and 403
-responses, cross-owner protection, City and Property CRUD, secure images, immediate account-token
-invalidation, live dashboard metrics, and Open-Meteo success, timeout, failure, invalid response,
-and caching.
+“ApplicationUser extends Identity with display data, account status, and a token version. A user
+may have one SellerProfile, and that profile owns Properties. Each Property references one
+normalized City and has ordered PropertyImages. UserStatusChange records Admin account actions.
+Explicit foreign keys and restrictive delete behavior protect referenced Cities, users,
+Properties, images, and audit history.
 
-“This is the committed ReportGenerator HTML summary. The verified backend line coverage is exactly
-91.2 percent: 2,382 covered lines out of 2,610 coverable lines. It combines API, Application,
-Domain, and Infrastructure coverage. Only generated Entity Framework migration code is excluded
-through the committed coverage run settings.”
+“Moderation and availability are deliberately separate. Moderation is Pending, Approved, or
+Rejected. Availability is Available, Sold, or Rented. New and materially edited listings become
+Pending. Public queries require Approved plus Available, not soft-deleted, and an active owner.
+Owners can mark sale listings Sold or rentals Rented without rewriting the moderation decision.
 
-#### 6:55-7:55 — Docker, UAT, and tradeoffs
+“The migrations show the evolution from the initial schema through canonical City seed data,
+Property workflow fields, image dimensions, and Admin user management. Persisted timestamps use
+UTC, and configuration lives in separate Entity Framework configuration classes.”
 
-**Show:** `docker-compose.yml`, terminal `docker compose ps`, `docs/UAT_REPORT.md`, then
-`docs/GATE_REPORT.md`.
+#### 5:05–6:15 — Identity, JWT authorization, and Admin protections
+
+**Show:** Authentication registration, JWT service/options, active-user handler, and Admin service.
 
 **Say:**
 
-“Docker Compose starts SQL Server 2022, the .NET API, and the Vite SSR web server. SQL Server must
-be healthy before the API starts, and the API readiness check must pass before the web service
-starts. Named volumes preserve SQL data and property uploads. The documented application URL is
-localhost port 3000, with the API on port 8081.
+“Registration and login use ASP.NET Core Identity, so passwords are hashed and public registration
+always creates a User rather than accepting a client-selected role. User and Admin roles and one
+configured Admin are seeded at startup from environment configuration. Secrets are represented
+only by placeholders in the repository.
 
-“Eight UAT scenarios are recorded as PASS. They cover authentication, authorization, both core
-CRUD entities, image security and persistence, weather resilience, Admin management, and a full
-restart that preserved database records and image hashes. The main tradeoffs were deliberate:
-short-lived in-memory JWTs avoid insecure browser persistence; controlled image streaming favors
-security over direct static serving; public-only SSR prevents private-data leakage; and focused
-Gate features took priority over optional enquiries, favourites, refresh tokens, and cloud
-services. That completes the technical walkthrough of the verified PropertyHub Gate
-implementation.”
+“JWT validation checks issuer, audience, signing key, lifetime, and zero clock skew. The browser
+keeps its short-lived access token only in React memory, so it is not written to local storage or
+server-rendered HTML.
 
-### Sensitive-screen warnings
+“A valid signature alone is not enough. The ActiveUser policy checks current account status and
+token version in SQL Server on every protected request. Disabling an account or changing its role
+increments that version, so an already-issued token loses access immediately. Tests verify 401
+for missing or invalid authentication and 403 for an authenticated User calling Admin endpoints.
+Admin rules block self-disable and self-demotion, prevent unsafe Admin disabling, and protect the
+last usable administrator.”
 
-- Never show `.env`, user secrets, JWT payloads, Authorization headers, passwords, password hashes,
-  SQL connection strings, or the Admin seed configuration.
-- Do not expand browser local/session storage or network request headers.
-- Coverage HTML is safe to show; raw Cobertura XML can contain machine-oriented paths and is less
-  readable.
-- If a terminal command fails during recording, do not troubleshoot secrets on screen. Refer to
-  the committed UAT evidence and continue.
+#### 6:15–7:05 — Protected image storage
 
-## Video 2: Non-Technical Demo
+**Show:** Image controller/service, validator, local storage, and Docker upload volume.
+
+**Say:**
+
+“Property creation and image upload are separate operations. An owner creates a listing, then uses
+protected image endpoints to upload between one and five files. The server accepts only JPEG, PNG,
+and WebP and validates extension, declared MIME type, file signature, decoded image, file size,
+dimensions, and pixel count. It generates collision-resistant storage names and never trusts the
+original filename as a path.
+
+“Files are outside the web root. LocalImageStorage resolves every path beneath its configured root,
+blocking traversal, while controlled API endpoints enforce ownership and public visibility and add
+safe response headers. Metadata, order, and primary-image state are stored in SQL Server; bytes are
+stored in the named upload volume. This favors control and privacy over the simplicity of public
+static-file serving.”
+
+#### 7:05–7:55 — React SSR and privacy boundary
+
+**Show:** React route configuration, `entry-server.tsx`, SSR data loader/serializer, and SSR tests.
+
+**Say:**
+
+“The public home, listing, and Property details routes are rendered in the Node Vite server and
+then hydrated in the browser. The server fetches only public response DTOs, generates meaningful
+HTML, and serializes the initial payload through a strict JSON boundary. Authenticated owner and
+Admin pages behave as client applications and fetch protected data only after an in-memory session
+exists.
+
+“A Docker UAT found that absent data for direct private-route requests was represented as
+JavaScript `undefined`, which JSON serialization could not convert into a string before escaping.
+The smallest correct fix represents that intentional absence as JSON `null`. Four direct-render
+regressions cover login, register, My Properties, and Admin Properties. Direct requests now return
+200, hydration is clean, and SSR HTML contains neither access tokens nor protected contact data.”
+
+#### 7:55–8:45 — Open-Meteo resilience
+
+**Show:** Property weather service, typed Open-Meteo client, registration/options, and weather UI.
+
+**Say:**
+
+“Weather uses actual Property location data. The service first loads a publicly visible Property,
+then takes latitude and longitude from its City. A typed HttpClient created by HttpClientFactory
+calls Open-Meteo with a finite configurable timeout, safely bounded and five seconds by default.
+Successful observations are cached by City for thirty minutes.
+
+“Non-success status codes, timeouts, network failures, malformed JSON, and invalid measurements
+produce a provider-neutral unavailable response. Failures are not allowed to break or replace the
+Property page. The React details page independently shows condition, temperature, humidity, wind,
+and UTC observation time when available.”
+
+**Safe fallback if live weather is unavailable:**
+
+“Open-Meteo is unavailable at this moment, and this is the designed fallback: the complete
+Property remains available, the page shows a safe unavailable message, and a transient failure is
+not cached as successful data.”
+
+#### 8:45–9:55 — Tests and exact coverage
+
+**Show:** A Property service unit test, authentication or image integration test, weather client
+test, SSR/frontend test, then `docs/coverage/index.html`.
+
+**Say:**
+
+“The backend has 38 unit tests and 41 integration tests, 79 in total. Unit tests focus on business
+rules such as Property validation and transitions, City conflicts, weather fallback and caching,
+file validation, and unsafe Admin actions. Integration tests exercise real endpoint workflows:
+registration and JWTs, 401 and 403 boundaries, cross-owner protection, City and Property CRUD,
+moderation, image authorization, immediate disabled-account rejection, user management, and
+dashboard metrics. Open-Meteo tests cover success, timeout, provider failure, invalid response,
+and cached results.
+
+“The current frontend suite contains 31 Vitest tests, including direct SSR regressions and owner,
+Admin, public listing, form, image, weather, and navigation behavior. Both client and SSR production
+builds pass.
+
+“This committed HTML report was generated by Coverlet and ReportGenerator. Verified backend line
+coverage is exactly 91.2 percent: 2,382 covered lines out of 2,610 coverable lines. API,
+Application, Domain, and Infrastructure are measured. Only generated Entity Framework migrations
+are excluded; application code was not hidden to inflate the number.”
+
+#### 9:55–10:45 — AI collaboration evidence
+
+**Show:** Root `ai-collaboration-log.md`; briefly highlight prompts 2, 16, and 14.
+
+**Say:**
+
+“AI assistance is documented as reviewed collaboration rather than unquestioned generation.
+Prompt two enforced Controllers to Services to domain-specific Repositories before implementation.
+Prompt sixteen required reproducing the direct-route SSR failure, capturing the exact undefined
+value, and fixing the transfer boundary instead of adding blind optional chaining. Prompt fourteen
+required honest coverage above eighty percent without weakening tests or excluding application
+code.
+
+“Each of the exactly twenty entries records its phase, exact supported prompt, purpose, and whether
+the result was accepted or modified. Outputs were checked against the canonical Gate, tests,
+Docker behavior, diffs, and retained evidence. Deferrals and uncertainty are recorded instead of
+being presented as completed work.”
+
+#### 10:45–11:40 — Docker, UAT, trade-offs, and lessons learned
+
+**Show:** Docker deployment diagram, terminal `docker compose ps`, root `uat-report.md`, then README
+Loom placeholders.
+
+**Say:**
+
+“Docker Compose starts SQL Server 2022, the .NET API, and the React Vite SSR server. SQL health
+gates API startup, and API readiness gates the web service. The private network keeps database
+traffic internal. Named volumes preserve SQL data and protected uploads. A full restart UAT
+confirmed healthy recovery and preserved users, Cities, Properties, image content, weather access,
+and both volume identities.
+
+“The capstone UAT summarizes more than ten major acceptance tests and links to detailed executed
+steps. The mandatory application Gate is supported by passing tests, 91.2 percent backend
+coverage, live browser and API checks, Docker health, and persistence evidence. The report keeps
+the unrecorded narrow-viewport visual pass as not run, and the Loom recordings remain blocked until
+their real links are supplied.
+
+“The central trade-offs were deliberate: memory-only JWTs improve browser storage safety but
+require login after refresh; controlled image streaming improves authorization at extra API cost;
+public-only SSR protects private data while authenticated dashboards remain client-driven; and
+focused Gate features took priority over optional enquiries, favourites, advanced filters, and
+email infrastructure. The main lesson was that architecture, security, and evidence must evolve
+together. Small vertical slices and live Docker UAT found issues that isolated builds could not.
+That completes the technical walkthrough.”
+
+### Technical recording warnings
+
+- Keep the terminal limited to `docker compose ps`; do not scroll into command history.
+- Do not show `.env`, `appsettings` secrets, JWTs, network headers, SQL tools, Admin seed
+  credentials, or browser storage.
+- Do not claim that optional deferred features exist.
+- If a file takes too long to open, continue with the prepared architecture or UAT tab rather than
+  searching live.
+- If weather is unavailable, use the exact fallback wording above; this demonstrates implemented
+  resilience rather than a failed demo.
+
+---
+
+## Video 2 — Non-Technical Demo
 
 **Target duration:** 7 minutes 45 seconds
-**Gate limit:** 10 minutes
 
-### Prepare before recording
+**Assessment requirement:** 5–10 minutes
+**Audience:** Product owner or non-technical reviewer
 
-Use two browser profiles or separate browser windows:
+### Prepare accounts, data, image, and browser windows
+
+Use two browser profiles or separate windows:
 
 - **User window:** signed out at `http://localhost:3000/properties`.
-- **Admin window:** already signed in at `http://localhost:3000/admin`.
+- **Admin window:** already authenticated at `http://localhost:3000/admin`. Do not expose how it
+  was authenticated.
 
 Prepare:
 
-- A unique demo email address that has not been registered.
-- A password that satisfies the form rules, stored in a password manager and never shown in plain
-  text.
-- One existing approved, available, image-backed public listing for the opening browse/weather
-  sequence.
-- One separate disposable active User account named clearly, such as “Loom Role Target”, for Admin
-  role and account-status actions. Do not use the seeded Admin or the newly registered demo owner
-  as the role-management target.
-- A safe JPEG, PNG, or WebP interior image under 5 MB, with no faces, personal documents, addresses,
-  metadata, or copyrighted watermark.
-- These property values ready to paste:
+- A unique unused demo email and a strong password stored in a password manager.
+- An existing approved, Available, image-backed public listing for the opening.
+- A separate disposable active User named `Loom Role Target` for role/status actions. Do not use
+  the seeded Admin or new demo owner.
+- A safe JPEG, PNG, or WebP image under 5 MB with no faces, documents, addresses, watermark, or
+  sensitive metadata.
+- Clipboard snippets for this listing:
 
 | Field | Prepared value |
 |---|---|
@@ -257,177 +365,195 @@ Prepare:
 | Area unit | Marla |
 | Bedrooms | 4 |
 | Bathrooms | 4 |
-| Contact number | A non-sensitive fictional demo number accepted by the form |
+| Contact number | A fictional number accepted by the form |
 
-Use clipboard snippets to keep data entry under one minute. The Admin window must already be
-authenticated because refreshing it clears the in-memory session.
+### Non-technical dry-run checklist
 
-### Pre-recording checklist
-
-- Confirm all three Docker services are healthy without showing the terminal during this video.
-- Confirm the opening public listing still displays an image and opens successfully.
-- Confirm the disposable role target is Active and has the User role.
-- Confirm the Pending moderation filter is selected in the Admin moderation window.
-- Close source code, terminals, Swagger, database tools, developer tools, password managers, and
-  environment files.
-- Turn off browser notifications and hide bookmarks or tabs containing private names.
-- Rehearse switching between the User and Admin windows without displaying credentials.
+- Confirm all three services are healthy before opening the recording software.
+- Confirm the prepared public listing and weather section load.
+- Confirm the disposable Admin target is Active with the User role.
+- Confirm the new demo email is unused and the prepared image is accepted.
+- At mobile width, check the navigation button, catalogue, details, form, owner cards, and Admin
+  dashboard for usability and horizontal overflow. Record any defect instead of hiding it.
+- Return the browser to desktop width for the opening.
+- Close code, terminals, Swagger, database tools, developer tools, password managers, and private
+  tabs.
+- Rehearse the entire flow without refreshing authenticated pages because the session is
+  intentionally memory-only.
 
 ### Timestamped word-for-word script
 
-#### 0:00-0:45 — Public marketplace
+#### 0:00–0:40 — Public marketplace
 
-**Show:** `http://localhost:3000/properties`, then use one essential filter if it retains a visible
-listing.
-
-**Say:**
-
-“This is PropertyHub, a local marketplace for moderated sale and rental listings. A visitor can
-browse without an account, and the public catalogue shows only listings that are approved,
-available, not deleted, and owned by an active account. I can narrow the catalogue by City,
-purpose, and property type. Each card gives a clear image, location, area, and price without
-revealing the owner’s private contact number.”
-
-#### 0:45-1:20 — Property details and weather
-
-**Show:** Open the prepared public Property detail page and scroll to Current weather.
+**Show:** `/properties`; apply one essential filter only if a result remains visible.
 
 **Say:**
 
-“The detail page presents the gallery, description, price, dimensions, and seller display name.
-Below that, PropertyHub uses the selected City’s saved coordinates to show current local weather.
-Here I can see the condition, temperature, humidity, wind, and the UTC observation time. This is
-useful context for a location visit, and it loads independently so it cannot break the listing.”
+“This is PropertyHub, a moderated local marketplace for property sales and rentals. Anyone can
+browse without creating an account. The catalogue shows a clear image, price, City, property type,
+purpose, and area, and I can narrow it by City, purpose, or type. Only approved listings that are
+still Available appear here, so Pending, Rejected, Sold, Rented, deleted, or disabled-owner
+properties do not appear. Private owner contact details are not exposed.”
 
-**Fallback if live weather is unavailable:**
+#### 0:40–1:15 — Details and meaningful weather
+
+**Show:** Open the prepared listing and scroll to Current weather.
+
+**Say:**
+
+“The detail page brings together the gallery, description, price, dimensions, and seller display
+name. It also uses this listing’s City location to show current weather, including condition,
+temperature, humidity, wind, and observation time. That is useful context when planning a visit,
+and it loads separately so the listing remains available if the weather provider has a problem.”
+
+**Safe fallback if live weather is unavailable:**
 
 “Open-Meteo is temporarily unavailable during this recording. PropertyHub handles that safely:
-the full listing remains usable and the page shows this friendly unavailable message instead of
-an error.”
+the complete listing still works and the page shows this friendly unavailable message instead of
+an application error.”
 
-#### 1:20-2:05 — Register and sign in
+#### 1:15–1:55 — Register and sign in
 
-**Show:** Register, submit the prepared new account, then Sign in.
-
-**Say:**
-
-“I’ll now create a new account. Registration asks only for a full name, email, and a strong
-password; it does not let the visitor choose an Admin role. The account is ready, so I’ll sign in
-using the same details. After authentication, PropertyHub opens the owner workspace. The session
-is intentionally held only for this browser session, so a reload requires signing in again.”
-
-#### 2:05-3:20 — Create, edit, and upload
-
-**Show:** `/my/properties`. Complete the prepared form, create the Property, scroll to its card,
-select Edit, make a small visible description change, save, then upload the prepared image.
+**Show:** Register using prepared data, then sign in with the masked password.
 
 **Say:**
 
-“My Properties combines the complete owner workflow. I’ll create a House for Sale in Lahore using
-the prepared title, description, location, price, area, rooms, and demo contact number. The contact
-number is stored with the owner’s listing but is not exposed on public pages.
+“I’ll create a normal user account. Registration asks for a name, email, and strong password; it
+does not allow someone to make themselves an administrator. The account is ready, so I’ll sign in
+with the same details. PropertyHub now opens the owner workspace. The session is deliberately
+temporary for browser safety, so refreshing would require signing in again.”
 
-“The new Property is created first and immediately enters Pending moderation. It is not public
-yet. I can edit every listing field, so I’ll add a short description detail and save the change.
-The listing remains Pending. For an already approved listing, a material edit also returns it to
-Pending for another review.
+#### 1:55–3:10 — Create, edit, upload, and show status
 
-“Images are managed separately after creation. I’ll upload this safe image. It now appears on the
-owner card, and the card clearly shows both independent states: moderation is Pending and
-availability is Available.”
-
-#### 3:20-4:20 — Admin dashboard and user search
-
-**Show:** Switch directly to the prepared Admin browser window at `/admin`. Refresh dashboard, then
-search for “Loom Role Target”.
+**Show:** `/my/properties`; create the prepared listing, edit one sentence, save, and upload the
+prepared image.
 
 **Say:**
 
-“I’m switching to a separately prepared Admin session, without displaying its credentials. This
-dashboard is protected and populated from the live SQL Server database. It shows total,
-registered, active, and disabled accounts; total, Pending, Approved, and Rejected properties; and
-the total City count. The timestamp confirms when these metrics were read.
+“My Properties contains the complete owner workflow. I’ll add this prepared House for Sale in
+Lahore with its location, price, area, rooms, and fictional contact number. The contact number
+belongs to the protected owner record and is not shown publicly.
 
-“Below the metrics is the searchable user list. I’ll search for the disposable role-management
-account so the change is controlled and easy to verify.”
+“The Property is created first and immediately displays Pending moderation and Available status.
+It is not public yet. I can edit all listing details, so I’ll add this small description change and
+save. A new or materially edited listing returns to Pending so an administrator can review what
+the public will see.
 
-#### 4:20-5:20 — Role and account management
+“Images are added separately after creation. I’ll upload this safe image, and it now appears on the
+owner card. The card keeps moderation and availability distinct and retains Edit, image management,
+delete, and Sold or Rented actions.”
 
-**Show:** Promote “Loom Role Target” to Admin, then change it back to User. Enter a safe reason,
-disable it, observe the status/metrics, then enter another reason and enable it.
+#### 3:10–3:45 — Responsive experience
 
-**Say:**
-
-“An Admin can promote a User to Admin and return the account to User. Each role change invalidates
-that account’s previous access immediately. PropertyHub also prevents an Admin from demoting
-their own signed-in account or removing the last usable Admin.
-
-“For account access, I’ll enter the reason ‘Loom access-control demonstration’ and disable this
-User. The status and live metrics update, and both an existing session and a new login would now
-be rejected. I’ll reactivate the account with the reason ‘Loom demonstration complete’. These
-status changes create audit records. Admin accounts cannot be disabled through this control, so
-the demonstration cannot accidentally lock out the platform.”
-
-#### 5:20-6:05 — Property moderation
-
-**Show:** Open `/admin/properties`, locate Garden View Family House, show its image and details, and
-click Approve.
+**Show:** Narrow the User browser to a mobile viewport; open the mobile navigation; briefly show
+the owner card and Add Property form, then return to desktop width.
 
 **Say:**
 
-“Next I’ll open Property moderation. The new Garden View Family House appears in Pending with the
-owner’s submitted details and image. An Admin can approve it, or reject it with a required reason.
-I’ll approve this valid demo listing. Approval changes the moderation status to Approved and makes
-the listing eligible for public discovery while its availability remains Available.”
+“PropertyHub adapts to a smaller screen without changing the workflow. The navigation becomes an
+accessible menu, controls remain keyboard-friendly, the Property card stacks its content, and the
+form remains readable without horizontal scrolling. The same actions and status labels stay
+available on mobile, tablet, and desktop.”
 
-#### 6:05-6:45 — Confirm the owner and public result
+If the dry run revealed a responsive defect, do not use the sentence above. State the limitation
+honestly and show only the working viewport.
 
-**Show:** Switch to the User window without refreshing, select Refresh listings, then Sign out.
-Load `/properties` directly in the address bar so the public SSR response is fresh. Locate and open
-the new listing.
+#### 3:45–4:30 — Admin dashboard and user search
 
-**Say:**
-
-“Back in the original User session, Refresh listings now shows the Approved status. After signing
-out, the property appears in the public catalogue with its uploaded image. Opening the detail page
-confirms the public result, while the private contact number remains hidden. Weather uses Lahore’s
-stored coordinates and continues to fail gracefully if the provider is unavailable.”
-
-#### 6:45-7:25 — Availability action
-
-**Show:** Sign in again without exposing the password, return to `/my/properties`, click Mark sold,
-then Sign out and load `/properties` directly in the address bar for a fresh public result.
+**Show:** Switch to the prepared Admin window at `/admin`; refresh metrics and search for
+`Loom Role Target`.
 
 **Say:**
 
-“I’ll sign back in and demonstrate listing availability. Because this is a sale listing, the owner
-can mark it Sold. Rental listings provide the equivalent Mark rented action. Sold and Rented are
-terminal availability states and are separate from Admin moderation. After marking this Property
-Sold and returning to the public catalogue, it is no longer publicly discoverable even though its
-moderation decision remains Approved.”
+“I’m switching to a separate prepared Admin session without displaying credentials. This protected
+dashboard uses live platform data. It shows total, active, and disabled users; total, Pending,
+Approved, and Rejected Properties; and the City count.
 
-#### 7:25-7:45 — User-value summary
+“Below the metrics is a searchable user list. I’ll find the disposable Loom Role Target account so
+the access demonstration does not affect the owner or the signed-in administrator.”
 
-**Show:** Public Properties page with the Property absent.
+#### 4:30–5:20 — One Admin access action
+
+**Show:** Promote target to Admin, return it to User, disable with a safe reason, then reactivate.
 
 **Say:**
 
-“PropertyHub gives visitors a clean, trusted catalogue, owners a complete listing and image
-workflow, and administrators live oversight of content and access. The result is a practical local
-marketplace with secure authorization, resilient location data, and clear moderation and
-availability states.”
+“An administrator can promote a User and return that account to the User role. Each role change
+ends the account’s previous access immediately. PropertyHub prevents the signed-in Admin from
+demoting or disabling themselves and protects the last usable administrator.
 
-### Sensitive-screen warnings
+“I’ll enter ‘Loom access-control demonstration’ and disable this disposable User. Its status and
+the live metrics change, and both an existing session and a new login are rejected. I’ll now
+reactivate it with ‘Loom demonstration complete’. These actions are audited, and the target is
+restored to its original safe state.”
 
-- Never show a password in plain text, the Admin seed email/password source, JWTs, browser storage,
-  network headers, Swagger, SQL tools, terminals, source code, or `.env`.
-- Use password-manager autofill or a pre-authenticated second browser profile. Keep password fields
-  masked and avoid opening the password-manager popup on screen.
-- Use fictional property contact data and a non-sensitive image. Do not upload personal documents,
-  family photographs, real phone numbers, or files with visible addresses.
-- Do not disable or demote the signed-in Admin. Use only the prepared disposable target and restore
-  it to Active/User during the recording.
-- Do not refresh authenticated User or Admin pages unnecessarily because JWTs are intentionally
-  stored only in React memory.
-- If a live action fails, state the expected behavior briefly and move to the already visible
-  evidence. Do not open developer tools or troubleshoot credentials on screen.
+#### 5:20–6:00 — Moderate the new listing
+
+**Show:** `/admin/properties`; locate Garden View Family House and approve it.
+
+**Say:**
+
+“The new Garden View Family House is waiting in Property moderation with its submitted details and
+image. An Admin can approve it or reject it with a required explanation. I’ll approve this valid
+demo listing. Moderation is now Approved while availability remains Available, making it eligible
+for the public catalogue.”
+
+#### 6:00–6:40 — Confirm public outcome
+
+**Show:** Return to User window without refreshing, refresh listings, sign out, then enter
+`/properties` directly and open the new listing.
+
+**Say:**
+
+“Back in the original owner session, Refresh listings shows the Approved decision. I’ll sign out
+and return to the public catalogue. The listing now appears with its image. Its detail page shows
+the public information and Lahore weather while keeping the fictional contact number private.”
+
+#### 6:40–7:30 — Mark Sold, delete, and confirm removal
+
+**Show:** Sign in again with the masked password, open My Properties, choose Mark sold, sign out,
+observe the Sold badge, then delete the disposable listing, sign out, and load `/properties`
+directly.
+
+**Say:**
+
+“I’ll sign in once more to demonstrate availability. Because this is a sale listing, the owner can
+mark it Sold. Rental listings provide the matching Mark rented action. Sold and Rented are final
+availability states, separate from the Admin’s moderation decision. The Sold badge confirms that
+transition. I have now demonstrated create, public read, edit, and availability management. To
+complete the core CRUD journey and clean up the disposable data, I’ll delete this owner listing.
+After signing out and returning to the public catalogue, the deleted Property no longer appears.”
+
+#### 7:30–7:45 — User-value summary
+
+**Show:** Public catalogue with the sold listing absent.
+
+**Say:**
+
+“PropertyHub gives visitors a trusted catalogue, owners a complete listing and image workflow, and
+administrators live control over content and access. It combines clear status, secure account
+rules, resilient local information, and persistent local deployment in one practical marketplace.”
+
+### Non-technical recording warnings
+
+- Do not show code, terminals, Swagger, SQL tools, browser developer tools, secrets, tokens, or
+  credentials.
+- Keep passwords masked and avoid recording password-manager pop-ups.
+- Use fictional contact data and a non-sensitive image.
+- Do not disable or demote the signed-in Admin. Restore the disposable target to Active/User.
+- Do not refresh an authenticated window unless signing in again is part of the script.
+- If weather is unavailable, use the prepared fallback; do not open developer tools.
+- If a live mutation fails, state that the demonstrated step did not complete and stop. Do not
+  claim a result that is not visible.
+
+## After recording
+
+1. Confirm the technical recording is between 10 and 15 minutes.
+2. Confirm the non-technical recording is between 5 and 10 minutes.
+3. Review both videos for accidental secrets, tokens, contact data, notifications, or unrelated
+   tabs before sharing.
+4. Set the sharing permissions required by the assessment and test both links in a signed-out
+   browser.
+5. Replace `LOOM_TECHNICAL_URL_PENDING` and `LOOM_DEMO_URL_PENDING` in this file and `README.md`
+   with the real URLs.
+6. Re-run the Markdown link check and `git diff --check`, then commit the two link updates.
