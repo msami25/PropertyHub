@@ -82,7 +82,7 @@ describe("authentication routes", () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() =>
-      expect(screen.getByRole("heading", { name: "My PropertyHub" })).toBeInTheDocument()
+      expect(screen.getByRole("heading", { name: "My properties" })).toBeInTheDocument()
     );
     expect(window.localStorage).toHaveLength(0);
     expect(window.sessionStorage).toHaveLength(0);
