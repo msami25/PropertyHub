@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <ItemGroup>
+    <ProjectReference Include="..\PropertyHub.Application\PropertyHub.Application.csproj" />
+    <ProjectReference Include="..\PropertyHub.Domain\PropertyHub.Domain.csproj" />
+    <ProjectReference Include="..\PropertyHub.Infrastructure\PropertyHub.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.20">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.20" />
+  </ItemGroup>
+</Project>

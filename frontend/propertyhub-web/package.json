@@ -1,0 +1,30 @@
+{
+  "name": "propertyhub-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.mjs",
+    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist/server",
+    "start": "node server/index.mjs --production",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "express": "5.1.0",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "6.8.0",
+    "@testing-library/react": "16.3.0",
+    "@types/express": "5.0.3",
+    "@types/node": "24.3.1",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "5.0.2",
+    "jsdom": "26.1.0",
+    "typescript": "5.9.2",
+    "vite": "7.3.6",
+    "vitest": "3.2.7"
+  }
+}

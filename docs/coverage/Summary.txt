@@ -1,0 +1,124 @@
+Summary
+  Generated on: 2026-07-29 - 2:30:47 PM
+  Coverage date: 2026-07-29 - 2:30:38 PM - 2026-07-29 - 2:30:42 PM
+  Parser: MultiReport (2x Cobertura)
+  Assemblies: 4
+  Classes: 96
+  Files: 94
+  Line coverage: 91.2%
+  Covered lines: 2382
+  Uncovered lines: 228
+  Coverable lines: 2610
+  Total lines: 4142
+  Branch coverage: 64.9% (451 of 694)
+  Covered branches: 451
+  Total branches: 694
+  Method coverage: 97.8% (558 of 570)
+  Full method coverage: 91.5% (522 of 570)
+  Covered methods: 558
+  Fully covered methods: 522
+  Total methods: 570
+
+PropertyHub.Api                                                                  90.6%
+  Program                                                                         100%
+  PropertyHub.Api.Authentication.ActiveUserAuthorizationHandler                   100%
+  PropertyHub.Api.Authentication.AuthenticationExtensions                         100%
+  PropertyHub.Api.Authentication.JwtOptions                                       100%
+  PropertyHub.Api.Authentication.JwtTokenService                                  100%
+  PropertyHub.Api.Controllers.AdminCitiesController                                84%
+  PropertyHub.Api.Controllers.AdminController                                    95.9%
+  PropertyHub.Api.Controllers.AdminPropertiesController                          88.8%
+  PropertyHub.Api.Controllers.AuthController                                     79.1%
+  PropertyHub.Api.Controllers.CitiesController                                    100%
+  PropertyHub.Api.Controllers.MyPropertiesController                              100%
+  PropertyHub.Api.Controllers.PropertiesController                               98.4%
+  PropertyHub.Api.Controllers.PropertyImagesController                           97.7%
+  PropertyHub.Api.Controllers.PropertyWeatherController                           100%
+  PropertyHub.Api.Middleware.GlobalExceptionHandler                              10.3%
+
+PropertyHub.Application                                                          91.2%
+  PropertyHub.Application.Contracts.Admin.AdminDashboardResponse                  100%
+  PropertyHub.Application.Contracts.Admin.AdminPropertyMetricsResponse            100%
+  PropertyHub.Application.Contracts.Admin.AdminUserListResponse                   100%
+  PropertyHub.Application.Contracts.Admin.AdminUserMetricsResponse                100%
+  PropertyHub.Application.Contracts.Admin.AdminUserQueryRequest                   100%
+  PropertyHub.Application.Contracts.Admin.AdminUserResponse                       100%
+  PropertyHub.Application.Contracts.Admin.ChangeUserRoleRequest                   100%
+  PropertyHub.Application.Contracts.Admin.ChangeUserStatusRequest                 100%
+  PropertyHub.Application.Contracts.Auth.AuthTokenResponse                        100%
+  PropertyHub.Application.Contracts.Auth.AuthUserResponse                         100%
+  PropertyHub.Application.Contracts.Auth.LoginRequest                             100%
+  PropertyHub.Application.Contracts.Auth.RegisterRequest                          100%
+  PropertyHub.Application.Contracts.Auth.RegistrationResponse                     100%
+  PropertyHub.Application.Contracts.Cities.CityListResponse                       100%
+  PropertyHub.Application.Contracts.Cities.CityResponse                           100%
+  PropertyHub.Application.Contracts.Cities.CreateCityRequest                      100%
+  PropertyHub.Application.Contracts.Cities.UpdateCityRequest                      100%
+  PropertyHub.Application.Contracts.Properties.CreatePropertyRequest              100%
+  PropertyHub.Application.Contracts.Properties.ModeratePropertyRequest            100%
+  PropertyHub.Application.Contracts.Properties.PropertyCityResponse               100%
+  PropertyHub.Application.Contracts.Properties.PropertyDetailResponse             100%
+  PropertyHub.Application.Contracts.Properties.PropertyImageResponse              100%
+  PropertyHub.Application.Contracts.Properties.PropertyImagesResponse             100%
+  PropertyHub.Application.Contracts.Properties.PropertyListResponse               100%
+  PropertyHub.Application.Contracts.Properties.PropertyManagementListResponse     100%
+  PropertyHub.Application.Contracts.Properties.PropertyManagementResponse         100%
+  PropertyHub.Application.Contracts.Properties.PropertyQueryRequest               100%
+  PropertyHub.Application.Contracts.Properties.PropertySummaryResponse            100%
+  PropertyHub.Application.Contracts.Properties.UpdateAvailabilityRequest          100%
+  PropertyHub.Application.Contracts.Properties.UpdatePropertyRequest              100%
+  PropertyHub.Application.Contracts.Weather.PropertyWeatherResponse               100%
+  PropertyHub.Application.Models.Admin.AdminDashboardData                         100%
+  PropertyHub.Application.Models.Admin.AdminUserAccount                           100%
+  PropertyHub.Application.Models.Admin.AdminUserListResult                        100%
+  PropertyHub.Application.Models.Admin.AdminUserMutationResult                    100%
+  PropertyHub.Application.Models.Admin.AdminUserPage                              100%
+  PropertyHub.Application.Models.Auth.AccountCreationResult                      83.3%
+  PropertyHub.Application.Models.Auth.AccountSnapshot                             100%
+  PropertyHub.Application.Models.Auth.CredentialValidationResult                  100%
+  PropertyHub.Application.Models.Auth.LoginResult                                 100%
+  PropertyHub.Application.Models.Auth.RegistrationResult                          100%
+  PropertyHub.Application.Models.Cities.CityMutationResult                        100%
+  PropertyHub.Application.Models.Properties.PropertyImageFileResult                80%
+  PropertyHub.Application.Models.Properties.PropertyImageMutationResult           100%
+  PropertyHub.Application.Models.Properties.PropertyImageUpload                   100%
+  PropertyHub.Application.Models.Properties.PropertyImageValidationResult         100%
+  PropertyHub.Application.Models.Properties.PropertyMutationResult                100%
+  PropertyHub.Application.Models.Weather.CurrentWeather                           100%
+  PropertyHub.Application.Models.Weather.PropertyWeatherResult                    100%
+  PropertyHub.Application.Services.AdminService                                  92.5%
+  PropertyHub.Application.Services.AuthService                                   90.6%
+  PropertyHub.Application.Services.CityService                                   90.4%
+  PropertyHub.Application.Services.PropertyImageService                          83.4%
+  PropertyHub.Application.Services.PropertyImageValidator                        93.8%
+  PropertyHub.Application.Services.PropertyService                               88.1%
+  PropertyHub.Application.Services.PropertyWeatherService                         100%
+
+PropertyHub.Domain                                                               98.4%
+  PropertyHub.Domain.Authorization.RoleNames                                      100%
+  PropertyHub.Domain.Entities.City                                                100%
+  PropertyHub.Domain.Entities.Property                                            100%
+  PropertyHub.Domain.Entities.PropertyImage                                       100%
+  PropertyHub.Domain.Entities.SellerProfile                                       100%
+  PropertyHub.Domain.Entities.UserStatusChange                                    100%
+  PropertyHub.Domain.Exceptions.DomainException                                     0%
+
+PropertyHub.Infrastructure                                                       91.1%
+  PropertyHub.Infrastructure.Data.ApplicationDbContext                            100%
+  PropertyHub.Infrastructure.Data.Configurations.ApplicationUserConfiguration     100%
+  PropertyHub.Infrastructure.Data.Configurations.CityConfiguration                100%
+  PropertyHub.Infrastructure.Data.Configurations.PropertyConfiguration            100%
+  PropertyHub.Infrastructure.Data.Configurations.PropertyImageConfiguration       100%
+  PropertyHub.Infrastructure.Data.Configurations.SellerProfileConfiguration       100%
+  PropertyHub.Infrastructure.Data.Configurations.UserStatusChangeConfiguration    100%
+  PropertyHub.Infrastructure.Data.Repositories.AdminUserRepository               97.5%
+  PropertyHub.Infrastructure.Data.Repositories.CityRepository                     100%
+  PropertyHub.Infrastructure.Data.Repositories.PropertyImageRepository            100%
+  PropertyHub.Infrastructure.Data.Repositories.PropertyRepository                86.3%
+  PropertyHub.Infrastructure.DependencyInjection                                 86.3%
+  PropertyHub.Infrastructure.External.OpenMeteoOptions                             50%
+  PropertyHub.Infrastructure.External.OpenMeteoWeatherClient                     73.8%
+  PropertyHub.Infrastructure.Files.LocalImageStorage                              100%
+  PropertyHub.Infrastructure.Identity.ApplicationUser                             100%
+  PropertyHub.Infrastructure.Identity.IdentitySeeder                             86.2%
+  PropertyHub.Infrastructure.Identity.IdentityUserAccountRepository              81.5%
