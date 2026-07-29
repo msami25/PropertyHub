@@ -1,178 +1,181 @@
 # PropertyHub AI Prompt Log
 
-This log records only prompts that materially influence implementation. It will contain at least 20
-reviewed entries before Gate submission.
+These are the 20 prompts that most materially affected the implementation. Each entry records why
+the prompt mattered and how its output was reviewed rather than treating AI output as accepted by
+default.
 
 ## Architecture
 
-### 1. Repository audit and Gate implementation plan
+### 1. Audit the repository against the approved requirements
 
-- **Prompt:** Inspect PropertyHub against the BRD and Build Sprint Gate, then prepare an
-  implementation plan.
-- **Why it mattered:** Established the documentation-only baseline and exposed the missing
-  canonical Gate document.
-- **Review:** The initial plan was revised to require domain-specific repositories and a smaller
-  scaffold phase.
+- **Prompt:** Read `AGENTS.md` and all relevant documentation, inspect PropertyHub, compare it with
+  the business requirements and Build Sprint Gate, and propose a structured implementation plan.
+- **Impact:** Established a requirements-first baseline before any files changed.
+- **Review:** The repository, branch, projects, tests, Docker files, and Markdown requirements were
+  inspected. The plan was corrected when the canonical Gate text was initially unavailable.
 
-### 2. Correct the architecture and establish the canonical Gate
+### 2. Enforce controllers to services to repositories
 
-- **Prompt:** Use controllers to services to repositories, require the canonical Gate file, separate
-  image uploads from Property creation, and limit the first phase to foundation work.
-- **Why it mattered:** Removed direct service-to-EF access and prevented a large unverified feature
-  dump.
-- **Review:** The final foundation plan uses separate projects and postpones feature abstractions
-  until their vertical slices.
+- **Prompt:** Follow the required controller-to-service-to-repository architecture; controllers
+  must not use EF Core directly and services must use repository abstractions.
+- **Impact:** Fixed the dependency direction before implementation began.
+- **Review:** Every feature uses thin controllers, application services, domain-specific
+  repositories, and EF Core only in Infrastructure. No generic repository was introduced.
 
-### 3. Separate moderation and availability state
+### 3. Make the canonical Gate the implementation priority
 
-- **Prompt:** Model moderation independently from Available, Sold, and Rented, and keep the scaffold
-  practical.
-- **Why it mattered:** Prevents moderation decisions from overwriting the owner-controlled listing
-  lifecycle.
-- **Review:** The initial model uses distinct `ModerationStatus` and `AvailabilityStatus` enums.
+- **Prompt:** Read `docs/BUILD_SPRINT_1_REQUIREMENTS.md` completely and treat it as higher priority
+  than optional BRD features or the review document.
+- **Impact:** Prevented favourites, advanced filters, MailHog, and other BRD expansion from
+  displacing mandatory Gate work.
+- **Review:** Conflicts and deferrals are recorded in `docs/SCOPE_CUTS.md`; mandatory Gate criteria
+  remain the acceptance baseline.
+
+### 4. Separate moderation from availability
+
+- **Prompt:** Model `ModerationStatus` as Pending/Approved/Rejected and `AvailabilityStatus` as
+  Available/Sold/Rented; hide unapproved, unavailable, deleted, and disabled-owner listings.
+- **Impact:** Prevented Admin moderation from overwriting the owner-controlled listing lifecycle.
+- **Review:** Separate enums, persistence fields, service transitions, public queries, API tests,
+  and frontend behavior enforce the distinction.
 
 ## Code generation
 
-### 4. Implement the approved Phase 1 scaffold
+### 5. Scaffold only the complete Phase 1 foundation
 
-- **Prompt:** Create and verify the layered backend, SSR frontend, tests, migration, Docker baseline,
-  environment template, and documentation without starting later feature slices.
-- **Why it mattered:** Authorizes the first repository implementation while preserving Gate-first
-  sequencing.
-- **Review:** Changes are being verified through restore, build, tests, migration scripting, Compose
-  validation, and focused commits.
+- **Prompt:** Create the .NET solution, layered backend, React/Vite SSR foundation, test projects,
+  database model/migration, exception handling, health checks, Docker baseline, and documentation
+  placeholders without implementing later slices.
+- **Impact:** Produced a buildable foundation without a giant unverified feature dump.
+- **Review:** Restore, build, tests, EF migration validation, Compose validation, diff review, and
+  focused commits were completed before authentication began.
 
-### 5. Implement JWT authentication as an isolated vertical slice
+### 6. Implement JWT authentication as one vertical slice
 
-- **Prompt:** Complete registration/login, User/Admin roles, configured Admin seeding,
-  disabled-account enforcement, protected routes, `401`/`403` tests, frontend integration,
-  documentation, and verification without beginning City CRUD.
-- **Why it mattered:** Defined a security-complete Phase 2 boundary and prevented unrelated domain
-  work from entering the authentication commits.
-- **Review:** The backend follows controller to service to identity repository, JWTs stay in browser
-  memory, and HTTP integration tests exercise active, disabled, User, and Admin behavior.
+- **Prompt:** Add registration/login, User/Admin roles, configurable Admin seeding, disabled-account
+  enforcement, protected frontend/API routes, and verified 401/403 behavior.
+- **Impact:** Established the security boundary used by every later feature.
+- **Review:** Identity handles password hashing; JWTs remain in browser memory; the ActiveUser
+  policy checks database status and token version on every protected request.
 
-### 11. Implement secure local Property images
+### 7. Implement City as the second CRUD entity
 
-- **Prompt:** Start Phase 5 implementation after the verified Property CRUD slice.
-- **Why it mattered:** Authorized the mandatory upload vertical slice without beginning the
-  Open-Meteo work in Phase 6.
-- **Review:** The implementation uses separate owner-scoped image endpoints, a Property image
-  service and domain-specific repository, generated names, storage outside the web root, multipart
-  limits, upload rate limiting, and controlled streaming. Validation checks extension, MIME type,
-  magic bytes, full ImageSharp decode, 8,000-pixel/40-megapixel bounds, 5 MB size, and the five-image
-  limit. Image changes reset moderation, approval requires an image, and the last image is retained.
-  Automated verification passed 55 backend and 24 frontend tests. Live Docker UAT verified unsafe
-  rejection, hidden/public authorization, SSR and hydrated display, `nosniff`, primary/deletion
-  rules, and persistence on the unchanged named upload volume. ImageSharp 4 required a license key,
-  so the reviewed dependency was pinned to patched 3.1.12, which restored and built without
-  vulnerability warnings.
+- **Prompt:** Complete Admin-only City CRUD through controller/service/repository, validation,
+  management UI, authorization tests, referential-integrity conflict handling, and Docker UAT.
+- **Impact:** Satisfied the Gate's explicit second full CRUD entity.
+- **Review:** Public active-city reference data and Admin CRUD were tested through services, API,
+  React, SQL Server, and live Docker; referenced deletion returns 409.
 
-### 12. Integrate resilient property weather
+### 8. Implement owner-scoped Property CRUD and moderation
 
-- **Prompt:** Implement Phase 6 with a typed Open-Meteo client, finite timeout, caching, graceful
-  fallback, City-coordinate weather UI, automated resilience tests, documentation, and live Docker
-  verification without beginning Phase 7.
-- **Why it mattered:** Completed the mandatory real external API slice while explicitly protecting
-  the public Property experience from provider latency and failure.
-- **Review:** A dedicated weather controller calls the application service, which uses the existing
-  public Property repository and a typed infrastructure client. The provider request uses stored
-  City coordinates, a five-second timeout, validated provider responses, friendly WMO condition
-  mapping, and a 30-minute success-only memory cache. The public DTO contains only useful weather
-  fields. Unit and isolated HTTP tests cover success, timeout, failure, malformed/unavailable data,
-  and caching; React tests cover success and fallback. Live Docker checks confirmed real Faisalabad
-  weather, a faster identical cache hit, graceful fallback against an unreachable provider,
-  uninterrupted Property API/SSR pages, successful provider restoration, and clean hydration.
+- **Prompt:** Implement Phase 4 according to the Gate and permanent agent guide.
+- **Impact:** Delivered the marketplace's primary owner/Admin/public workflow.
+- **Review:** API enforcement covers ownership, validation, duplicate prevention, moderation,
+  availability, soft deletion, disabled-owner filtering, public privacy, and essential filters.
 
-### 13. Implement protected Admin management
+### 9. Implement secure local property images
 
-- **Prompt:** Implement Phase 7 with live database metrics, user listing, role changes,
-  enable/disable behavior, protected Admin UI/API, validation, authorization tests, Docker
-  verification, self-protection, and immediate access removal without beginning Phase 8.
-- **Why it mattered:** Completed the Gate’s separate Admin experience and its highest-risk account
-  mutations while preserving the established JWT and public-listing security model.
-- **Review:** The controller calls an Admin application service backed by a domain-specific
-  Identity/EF repository. Metrics distinguish total accounts from registered users and count live
-  active/disabled accounts, non-deleted Property moderation states, and Cities. Version-checked
-  role/status mutations increment token versions; status changes persist immutable reasons,
-  actor/target IDs, UTC time, and correlation IDs. The service rejects invalid roles/reasons,
-  stale versions, self-demotion, self-disable, Admin disable, and last-active-Admin demotion.
-  Automated verification passed 79 backend and 30 frontend tests. Live Docker API/SQL/browser UAT
-  confirmed 401/403, metrics, promotion/demotion, immediate stale-token rejection, audited
-  disable/reactivate behavior, protected controls, clean hydration, and preserved named volumes.
+- **Prompt:** Add separate protected image endpoints, local persistence, validation, ownership,
+  primary/deletion behavior, frontend display, tests, and Docker verification.
+- **Impact:** Completed the mandatory upload and display journey without coupling images to
+  Property creation.
+- **Review:** Extension, MIME, magic bytes, decode, dimensions, pixel count, file size, count,
+  randomized storage names, `nosniff`, authorization, and named-volume persistence were verified.
 
-## Testing
+### 10. Integrate resilient property weather
 
-The Phase 2 implementation prompt produced service tests with Moq and HTTP integration coverage for
-registration, login, role enforcement, disabled accounts, and invalid tokens.
+- **Prompt:** Use a typed Open-Meteo `HttpClient`, finite timeout, caching, graceful fallback, City
+  coordinates, property-detail UI, resilience tests, and Docker verification.
+- **Impact:** Satisfied the real external API requirement without making Property details depend on
+  provider availability.
+- **Review:** Success, timeout, failure, invalid/unavailable response, cache behavior, live weather,
+  forced failure fallback, and restored provider behavior all passed.
 
-### 7. Implement City as the second Gate CRUD entity
+### 11. Implement the protected Admin dashboard
 
-- **Prompt:** Complete the Admin-only City API, controller-service-repository flow, validation,
-  management UI, authorization/CRUD tests, referential conflict handling, documentation, and
-  Docker verification without beginning Property CRUD.
-- **Why it mattered:** Delivered the second mandatory Gate CRUD entity as a complete vertical slice
-  rather than a database-only model.
-- **Review:** The implementation keeps active reference data public, protects all mutations with
-  the Admin policy, returns 409 for duplicate/referenced cities, seeds canonical coordinates, and
-  exercises the same flow through unit, integration, React, Docker API, SQL Server, and browser UI
-  checks.
+- **Prompt:** Add live SQL metrics, user listing, role changes, enable/disable behavior, protected
+  UI/API, validation, authorization tests, immediate access removal, and unsafe self-action guards.
+- **Impact:** Completed the Gate's Admin management workflow.
+- **Review:** Role/status changes invalidate JWTs, self-demotion/self-disable are blocked, Admin
+  disable and last-Admin demotion are prevented, and status changes retain focused audit evidence.
 
-### 8. Implement Property CRUD as the next Gate vertical slice
+## Testing and quality
 
-- **Prompt:** Implement Phase 4 according to the canonical Gate and permanent agent guide.
-- **Why it mattered:** Authorized the owner-scoped Property workflow, separate moderation and
-  availability lifecycles, public SSR pages, Admin moderation, and end-to-end automated evidence
-  without starting image uploads.
-- **Review:** Controllers call the Property service, the service enforces business transitions and
-  uses a domain-specific repository, and EF Core alone handles persistence. Tests verify owner
-  isolation, 401/403 behavior, inactive cities, duplicate prevention, moderation visibility,
-  disabled-owner filtering, terminal Sold/Rented states, public-data privacy, and React journeys.
-  Live Docker evidence later confirmed those workflows and exposed a direct-route SSR failure that
-  received a focused regression fix.
+### 12. Cover authentication and authorization outcomes
 
-## Security
+- **Prompt:** Verify registration/login, invalid and missing JWTs, User-to-Admin access, disabled
+  login, and rejection of a disabled account's already-issued token.
+- **Impact:** Made the 401/403 boundary evidence-based instead of relying on attributes alone.
+- **Review:** Unit/integration tests and live Docker probes confirmed 201/200/401/403 outcomes and
+  immediate token invalidation.
 
-The Phase 2 implementation prompt established short-lived signed JWTs, strict issuer/audience/key
-validation, per-request account-status checks, rate limiting, and safe Admin seeding.
+### 13. Cover ownership and moderation transitions
 
-## Docker and debugging
+- **Prompt:** Test owner isolation, Property CRUD, Pending/Approved/Rejected visibility,
+  Sold/Rented terminal states, validation, and public-data privacy.
+- **Impact:** Targeted the highest-risk domain and IDOR paths.
+- **Review:** Service and API tests assert cross-owner 404 behavior and public filtering; React and
+  Docker journeys verify the corresponding user experience.
 
-### 6. Verify authentication in the complete Docker environment
+### 14. Measure final backend coverage honestly
 
-- **Prompt:** Run restore, builds, tests, migration validation, Compose validation, and live
-  container checks; fix Phase 2 failures before reporting.
-- **Why it mattered:** Required evidence that authentication works against SQL Server and the
-  production-shaped API/SSR containers, not only the in-memory integration host.
-- **Review:** The live probe covered health, registration, login, seeded Admin access, 401/403
-  behavior, and immediate rejection of a disabled account's existing JWT.
+- **Prompt:** Achieve and verify at least 80% backend coverage, retain Cobertura and readable HTML
+  evidence, and do not weaken tests or exclude application code to inflate the result.
+- **Impact:** Converted test volume into a measurable Gate result.
+- **Review:** Coverlet measured 91.2% line coverage (2,382/2,610). Only generated EF migrations are
+  excluded; API, Application, Domain, and Infrastructure are included.
 
-### 9. Resume the blocked Phase 4 Docker UAT
+### 15. Run the complete frontend quality checkpoint
 
-- **Prompt:** With Docker Desktop healthy again, run only the blocked Compose build and live Phase 4
-  UAT, preserve named volumes, update evidence, and commit documentation only.
-- **Why it mattered:** Converted an environmental blocker into actual container evidence without
-  expanding into Phase 5 or rewriting completed Phase 4 code.
-- **Review:** Images built and all services became healthy. SQL-backed Property CRUD, authorization,
-  moderation, public visibility, public SSR privacy, and hydrated owner/Admin UI routes passed.
-  Direct private-route requests returned HTTP 500 because the SSR serializer receives undefined
-  public-page data. The UAT was therefore recorded as `FAIL`, and application code was left
-  unchanged as requested.
+- **Prompt:** Run a clean npm install, all frontend tests, and production client/SSR builds; fix
+  failures before reporting.
+- **Impact:** Verified hydrated and server-rendered behavior from the same final source state.
+- **Review:** npm reported zero vulnerabilities, 30 Vitest tests passed, and both Vite builds
+  succeeded.
 
-### 10. Fix direct-route SSR serialization
+## Security and debugging
 
-- **Prompt:** Reproduce the direct `/login`, `/register`, `/my/properties`, and
-  `/admin/properties` Docker failures, trace the undefined value, implement the smallest SSR-safe
-  fix, add regression tests, rebuild only web, and rerun the affected UAT.
-- **Why it mattered:** Direct navigation and refresh are core frontend behavior even when hydrated
-  client navigation already works.
-- **Review:** The complete trace showed `loadPublicPageData` returned `undefined` for non-public
-  routes, which is not representable in the JSON transfer payload. The SSR boundary now converts
-  only that intentional absence to `null`; the strict serializer remains unchanged. Four direct SSR
-  regressions were added, 22 frontend tests and both builds passed, only the web container was
-  rebuilt, all direct responses returned 200, hydration had no console issues, and public SSR
-  remained free of contact numbers and tokens.
+### 16. Diagnose the direct-route SSR failure
 
-## Documentation
+- **Prompt:** Reproduce the Docker 500 responses, capture the full stack, trace the exact undefined
+  value, implement the smallest correct SSR-safe fix, and add four direct-render regressions.
+- **Impact:** Fixed refresh/direct navigation without weakening route authorization.
+- **Review:** The root cause was absent public route data crossing a strict JSON transfer boundary;
+  only that intentional absence is now represented as `null`. Hydration and privacy checks passed.
 
-Entries will be added as final UAT, coverage, and walkthrough evidence is produced.
+### 17. Keep configured administrator secrets private
+
+- **Prompt:** Answer a request for the configured Admin password without exposing credentials.
+- **Impact:** Exercised the permanent rule that passwords and environment secrets must never appear
+  in chat, logs, documentation, or commits.
+- **Review:** The response directed the operator to their own `SeedAdmin__Password` configuration
+  and did not read or reveal the value.
+
+## Docker and UAT
+
+### 18. Resume blocked Property Docker UAT without volume loss
+
+- **Prompt:** After Docker recovered, run only the blocked build/UAT, preserve named volumes, update
+  evidence, and do not begin the next phase.
+- **Impact:** Turned an environment blocker into real container evidence while preserving state.
+- **Review:** Compose health, SQL-backed Property workflows, SSR, hydration, authorization, and
+  volume names were captured; the SSR defect was reported as FAIL before it was fixed.
+
+### 19. Rebuild and restart the final full stack
+
+- **Prompt:** Run a full-stack restart and persistence UAT, execute the Gate checklist, and fix all
+  in-scope failures.
+- **Impact:** Verified recovery and persistence rather than only first startup.
+- **Review:** SQL Server, API, and web recovered healthy; user/property/City counts, an approved
+  Property, its image hash, weather endpoint, SSR response, and both named volumes were preserved.
+
+## Documentation and delivery
+
+### 20. Finalize honest submission evidence
+
+- **Prompt:** Complete README, UAT, scope cuts, top-20 prompt log, committed coverage reports, small
+  local commits, and report any acceptance criteria that remain unverified without pushing.
+- **Impact:** Aligned the repository evidence with the actual final implementation and command
+  results.
+- **Review:** The final Gate report uses only PASS, FAIL, BLOCKED, or DEFERRED. Missing Loom videos
+  remain BLOCKED rather than being described as complete, and all commits remain local.

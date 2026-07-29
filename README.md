@@ -5,11 +5,11 @@ Vite SSR, EF Core, SQL Server, and Docker Compose.
 
 ## Current status
 
-Phases 1 through 7 provide the layered foundation, JWT authentication and authorization, City CRUD,
-Property CRUD, secure local property images, resilient property weather, and protected Admin user
-management with live database metrics. Public property list and detail pages are server-rendered
-and hydrated; owners manage only their listings and images, and Admins moderate listings, cities,
-roles, and account access.
+Phases 1 through 8 provide the layered foundation, JWT authentication and authorization, City CRUD,
+Property CRUD, secure local property images, resilient property weather, protected Admin user
+management with live database metrics, and final coverage/UAT evidence. Public property list and
+detail pages are server-rendered and hydrated; owners manage only their listings and images, and
+Admins moderate listings, cities, roles, and account access. Backend line coverage is 91.2%.
 
 ## Architecture
 
@@ -170,6 +170,7 @@ npm.cmd run build --prefix frontend/propertyhub-web
 docker compose --env-file .env.example config --quiet
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase5DockerUat.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase7DockerUat.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase8PersistenceUat.ps1
 ```
 
 ## Docker
@@ -186,9 +187,12 @@ only API/web and passed live Open-Meteo success, cache, forced-provider-failure 
 page continuity, SSR hydration, and provider restoration checks without recreating named volumes.
 Phase 7 applied the Admin user-management migration, rebuilt only API/web, and passed live metrics,
 authorization, role transition, immediate token invalidation, disable/reactivate audit, protected
-UI, safe direct-route SSR, and named-volume preservation checks.
+UI, safe direct-route SSR, and named-volume preservation checks. The final Phase 8 rebuild used the
+same Compose configuration and preserved both named volumes. A subsequent full Compose restart
+retained live SQL counts, an approved Property, its image SHA-256, weather, and SSR output, and all
+services recovered healthy.
 
-The final startup command will be:
+The complete startup command is:
 
 ```powershell
 docker compose up --build
@@ -196,12 +200,60 @@ docker compose up --build
 
 ## Coverage and UAT
 
-Backend coverage must reach at least 80% after mandatory features are implemented. Generated
-migrations may be excluded. Coverage evidence will be stored under `docs/coverage/`; executed
-acceptance results will be recorded in `docs/UAT_REPORT.md`.
+The final Coverlet run passed 38 unit and 41 integration tests and measured 91.2% backend line
+coverage: 2,382 covered of 2,610 coverable lines. The report includes API, Application, Domain, and
+Infrastructure. Only generated EF Core migration files are excluded through
+`tests/coverage.runsettings`.
+
+Restore the repository-local tools, collect both test-project reports, and merge them with:
+
+```powershell
+dotnet tool restore
+dotnet test PropertyHub.sln --no-build `
+  --settings tests/coverage.runsettings `
+  --collect:"XPlat Code Coverage" `
+  --results-directory artifacts/coverage
+dotnet reportgenerator `
+  -reports:"artifacts/coverage/**/coverage.cobertura.xml" `
+  -targetdir:"artifacts/coverage-report" `
+  -reporttypes:"HtmlSummary;Cobertura;TextSummary"
+```
+
+Committed evidence:
+
+- `docs/coverage/coverage.cobertura.xml`
+- `docs/coverage/index.html`
+- `docs/coverage/Summary.txt`
+- `docs/UAT_REPORT.md`
+- `docs/GATE_REPORT.md`
+
+## Walkthrough outlines
+
+The technical walkthrough should remain under 15 minutes:
+
+1. Show the controller/service/domain-specific-repository architecture and project structure.
+2. Explain Identity/JWT, ActiveUser/token-version enforcement, and 401/403 behavior.
+3. Show the SQL model and migrations for User, City, Property, PropertyImage, and status audit.
+4. Demonstrate Property/City CRUD, moderation, image security, Open-Meteo resilience, and Admin
+   management.
+5. Run or show the 79 backend tests, 30 frontend tests, 91.2% coverage report, Compose health, and
+   persistence UAT evidence.
+
+The non-technical walkthrough should remain under 10 minutes and avoid showing code:
+
+1. Register and sign in as a User.
+2. Create/edit a Property, upload an image, and show the Pending owner view.
+3. Sign in as Admin, manage a City, moderate the Property, view live metrics, and demonstrate a
+   safe role/status change.
+4. Return to the public listing/detail pages and show the image and current weather.
+5. Delete the disposable Property and confirm the expected public/owner state.
+
+The recordings and externally accessible Loom links are not present, so both video acceptance
+items remain `BLOCKED` in the final Gate report.
 
 ## Known limitations
 
-See `docs/SCOPE_CUTS.md`. Contact reveal and enquiries remain future slices. Background retention
-cleanup for hidden image files remains deferred until mandatory Gate slices are stable. Backend
-coverage evidence and the 80% Gate threshold are handled in Phase 8.
+See `docs/SCOPE_CUTS.md`. Contact reveal, enquiries, favourites, advanced filters, MailHog/outbox,
+and background image cleanup remain deferred because they are outside the higher-priority canonical
+Gate checklist and the approved Phase 8 boundary. Loom recording remains an external submission
+blocker, not an implemented feature or acceptable mandatory scope cut.

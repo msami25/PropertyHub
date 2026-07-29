@@ -14,6 +14,10 @@ deferrals that protect mandatory delivery.
 | Background image cleanup | DEFERRED | The Gate requires secure local persistence but not timed retention processing; adding a worker before the remaining Gate slices would expand scope | None | Add the BRD's configurable 30-day cleanup after mandatory Gate verification |
 | Cloud hosting/storage | DEFERRED | Project must run locally | None | Consider only outside this capstone |
 | Rejected-listing correction workflow | DEFERRED | Owners can edit a rejected listing, which returns it to Pending; a separate correction state is not required by the Gate | None | Add review comments/history after mandatory workflows pass |
+| Authenticated contact reveal | DEFERRED | Required by the broader BRD/review but not by the higher-priority canonical Gate checklist or the permanent Gate MVP; Phase 8 is limited to coverage, quality, UAT, and evidence | None for canonical Gate | Implement next with owner/self-contact privacy tests |
+| Enquiries and owner inbox | DEFERRED | Required by the broader BRD/review but not by the higher-priority canonical Gate checklist; implementing it would introduce another domain workflow after the approved Phase 8 boundary | None for canonical Gate | Add stored enquiries before optional email delivery |
 
-Contact reveal and enquiries are sequenced after mandatory Gate stability. Property moderation is
-implemented in Phase 4 and is not a scope cut.
+The review document's Frozen Gate calls contact reveal and enquiries mandatory, while the canonical
+Gate checklist and `AGENTS.md` mandatory MVP do not. Per the approved priority order and explicit
+phase boundary, they remain deferred after mandatory Gate stability rather than being silently
+treated as implemented. Property moderation is implemented and is not a scope cut.

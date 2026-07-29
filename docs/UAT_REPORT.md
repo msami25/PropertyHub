@@ -1,10 +1,9 @@
 # PropertyHub UAT Report
 
-The complete Gate UAT remains `BLOCKED` until all mandatory phases are implemented and exercised.
-Phase 2 authentication and Phase 3 City CRUD were manually exercised against the Docker
-environment on 2026-07-28. Phases 4 through 7 automated workflows pass and live Docker execution
-completed on 2026-07-29. The direct-route SSR defect found during Phase 4 was fixed, and the
-affected Docker and browser checks passed on rerun.
+All mandatory application scenarios in this report are `PASS`. Phase 2 authentication and Phase 3
+City CRUD were manually exercised against Docker on 2026-07-28. Phases 4 through 7 and the final
+coverage, full rebuild, restart, persistence, and browser checks completed on 2026-07-29. The
+direct-route SSR defect found during Phase 4 was fixed and passed regression and live reruns.
 
 | ID | Scenario | Expected result | Actual result | Evidence | Status |
 |---|---|---|---|---|---|
@@ -15,7 +14,7 @@ affected Docker and browser checks passed on rerun.
 | UAT-05 | Upload property images | Valid images persist and display; unsafe input is rejected | Owner uploaded two decoded PNGs, changed the primary image, deleted a non-last image, and received 409 for last-image deletion; invalid signature returned 400; hidden/public access followed moderation; SSR and hydrated pages displayed the image; the image remained available after API recreation | Docker API/SSR/browser probe; `PropertyImageEndpointTests`; `PropertyImageValidatorTests`; `LocalImageStorageTests`; `property-images.test.tsx` | PASS |
 | UAT-06 | Display Open-Meteo weather | Details show weather or a graceful unavailable state | Live City-coordinate weather rendered; an unreachable provider returned a friendly unavailable result while Property API and SSR remained 200 | Docker API/browser probes; `OpenMeteoWeatherClientTests`; `PropertyWeatherServiceTests`; `property-public.test.tsx` | PASS |
 | UAT-07 | Manage users and metrics | Admin changes roles/status and sees live database counts | Live metrics matched SQL-backed state; role and status changes invalidated existing JWTs; self-demotion/self-disable returned 409; disable/reactivate wrote audit records and updated metrics | `Invoke-Phase7DockerUat.ps1`; Docker API/SQL/browser probes; `AdminEndpointTests`; `AdminServiceTests`; `admin-dashboard.test.tsx` | PASS |
-| UAT-08 | Restart Docker services | SQL data and uploaded images survive a normal restart | Not implemented | Pending | BLOCKED |
+| UAT-08 | Restart Docker services | SQL data and uploaded images survive a normal restart | SQL/API/web recovered healthy; live counts, approved Property, identical image hash, weather, and SSR survived; SQL/upload volume names were unchanged | `Invoke-Phase8PersistenceUat.ps1`; Compose/API/SSR/browser probes | PASS |
 
 ## Phase 2 execution steps
 
@@ -172,5 +171,35 @@ affected Docker and browser checks passed on rerun.
 9. Restored the browser-managed target to Active/User and demoted the disposable browser Admin to
    User, leaving no additional privileged test account. UAT-07 is `PASS`.
 
-Remaining scenarios will receive the same evidence and a truthful `PASS` or `FAIL` only when
-implemented and manually executed.
+### UAT-08 final restart and persistence execution
+
+1. Ran `docker compose --env-file .env.example config --quiet` and
+   `docker compose --env-file .env.example up -d --build`. API and web images built and SQL Server,
+   API, and web all reached `healthy`; named volumes were not deleted or recreated.
+2. Reran `tests/Invoke-Phase5DockerUat.ps1`. Registration/login returned 201/200, unsafe signature
+   upload returned 400, two valid images uploaded, hidden/public image authorization returned
+   200/404 as expected, approval and SSR display returned 200, last-image deletion returned 409,
+   and the retained image survived API recreation. Evidence Property:
+   `7f40f65e-4c76-473a-89c7-c0bc03dd6548`.
+3. Reran `tests/Invoke-Phase7DockerUat.ps1`. Anonymous/User Admin access returned 401/403; role
+   promotion/demotion, disable/reactivate, token invalidation, self-protection, two audit rows, and
+   database-backed metrics passed. The restored baseline was 18 active and one disabled account.
+4. Ran `tests/Invoke-Phase8PersistenceUat.ps1`. Its first attempt stopped before restart because
+   Windows PowerShell 5.1 lacks `Convert.ToHexString`; the script was corrected to the compatible
+   `BitConverter` representation and rerun.
+5. The corrected script captured live counts and an approved image-backed Property, then issued
+   `docker compose restart` for SQL Server, API, and web. Every service recovered healthy.
+6. API/web health returned 200. The same approved Property returned 200 before and after restart,
+   the image SHA-256 remained identical, weather and direct SSR returned 200, and counts remained
+   19 users, five non-deleted properties, and eight cities.
+7. SQL and upload mounts remained `propertyhub_propertyhub-sql-data` and
+   `propertyhub_propertyhub-uploads`.
+8. Opened a fresh direct `/properties` tab against the production web container. SSR/hydration
+   displayed three approved image-backed cards with accessible image alt text; every image loaded
+   with a non-zero natural width. Page HTML contained neither `contactNumber` nor `accessToken`,
+   and the browser console contained no warnings or errors.
+9. Final host verification passed 38 unit and 41 integration tests, 30 frontend tests, both Vite
+   production builds, and 91.2% backend line coverage.
+
+UAT-01 through UAT-08 are `PASS`. Video recording is tracked separately in the final Gate report
+because it is submission evidence rather than an application UAT scenario.
