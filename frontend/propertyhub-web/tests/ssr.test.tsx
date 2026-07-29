@@ -7,6 +7,19 @@ import { render } from "../src/entry-server";
 describe("PropertyHub application shell", () => {
   afterEach(() => vi.unstubAllGlobals());
 
+  it.each([
+    ["/login", "<h1>Sign in</h1>"],
+    ["/register", "<h1>Register</h1>"],
+    ["/my/properties", "<h1>Sign in required</h1>"],
+    ["/admin/properties", "<h1>Sign in required</h1>"]
+  ])("directly server renders %s with JSON-safe empty public data", async (route, heading) => {
+    const result = await render(route);
+
+    expect(result.html).toContain(heading);
+    expect(result.initialPublicData).toBeNull();
+    expect(JSON.stringify(result.initialPublicData)).toBe("null");
+  });
+
   it("server renders public property data without private contact data", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({
       items: [{

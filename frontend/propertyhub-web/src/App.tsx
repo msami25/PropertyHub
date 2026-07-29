@@ -40,7 +40,7 @@ function ClientLink({
 
 interface AppProps {
   url?: string;
-  initialPublicData?: PublicPageData;
+  initialPublicData?: PublicPageData | null;
 }
 
 export function App({ url = "/", initialPublicData }: Readonly<AppProps>) {
