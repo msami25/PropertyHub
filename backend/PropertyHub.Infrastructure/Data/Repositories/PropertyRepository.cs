@@ -118,6 +118,7 @@ public sealed class PropertyRepository(ApplicationDbContext context) : IProperty
             property.ModerationStatus == ModerationStatus.Approved
             && property.AvailabilityStatus == AvailabilityStatus.Available
             && !property.IsDeleted
+            && property.Images.Any()
             && context.Users.Any(user =>
                 user.Id == property.SellerProfile.UserId
                 && user.Status == AccountStatus.Active));
@@ -127,6 +128,7 @@ public sealed class PropertyRepository(ApplicationDbContext context) : IProperty
         var query = context.Properties
             .Include(property => property.City)
             .Include(property => property.SellerProfile)
+            .Include(property => property.Images)
             .AsQueryable();
         return noTracking ? query.AsNoTracking() : query;
     }

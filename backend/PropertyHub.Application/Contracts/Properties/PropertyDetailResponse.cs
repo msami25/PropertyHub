@@ -15,4 +15,5 @@ public sealed record PropertyDetailResponse(
     AreaUnit AreaUnit,
     int? Bedrooms,
     int? Bathrooms,
-    string SellerDisplayName);
+    string SellerDisplayName,
+    IReadOnlyList<PropertyImageResponse> Images);

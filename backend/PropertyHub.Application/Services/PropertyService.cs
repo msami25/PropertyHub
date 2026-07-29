@@ -261,6 +261,12 @@ public sealed class PropertyService(
                 PropertyMutationOutcome.InvalidTransition,
                 Error: "Only pending properties can be moderated.");
         }
+        if (request.Status == ModerationStatus.Approved && property.Images.Count == 0)
+        {
+            return new PropertyMutationResult(
+                PropertyMutationOutcome.InvalidTransition,
+                Error: "A property requires at least one image before approval.");
+        }
 
         property.ModerationStatus = request.Status;
         property.RejectionReason = request.Status == ModerationStatus.Rejected ? reason : null;
@@ -393,7 +399,11 @@ public sealed class PropertyService(
             property.Area,
             property.AreaUnit,
             property.Bedrooms,
-            property.Bathrooms);
+            property.Bathrooms,
+            property.Images
+                .Where(image => image.IsPrimary)
+                .Select(image => PropertyImageService.MapImage(image).Url)
+                .SingleOrDefault());
 
     private static PropertyDetailResponse MapPublicDetail(Property property) =>
         new(
@@ -409,7 +419,8 @@ public sealed class PropertyService(
             property.AreaUnit,
             property.Bedrooms,
             property.Bathrooms,
-            property.SellerProfile.DisplayName);
+            property.SellerProfile.DisplayName,
+            MapImages(property));
 
     private static PropertyManagementResponse MapManagement(Property property) =>
         new(
@@ -430,5 +441,12 @@ public sealed class PropertyService(
             property.AvailabilityStatus,
             property.RejectionReason,
             property.CreatedAtUtc,
-            property.UpdatedAtUtc);
+            property.UpdatedAtUtc,
+            MapImages(property));
+
+    private static IReadOnlyList<PropertyImageResponse> MapImages(Property property) =>
+        property.Images
+            .OrderBy(image => image.SortOrder)
+            .Select(PropertyImageService.MapImage)
+            .ToArray();
 }

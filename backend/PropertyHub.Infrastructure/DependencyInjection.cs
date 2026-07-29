@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PropertyHub.Application.Interfaces.Repositories;
+using PropertyHub.Application.Interfaces.Services;
 using PropertyHub.Infrastructure.Data;
 using PropertyHub.Infrastructure.Data.Repositories;
+using PropertyHub.Infrastructure.Files;
 using PropertyHub.Infrastructure.Identity;
 
 namespace PropertyHub.Infrastructure;
@@ -37,6 +39,13 @@ public static class DependencyInjection
         services.AddScoped<IUserAccountRepository, IdentityUserAccountRepository>();
         services.AddScoped<ICityRepository, CityRepository>();
         services.AddScoped<IPropertyRepository, PropertyRepository>();
+        services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
+        var imageRoot = configuration["ImageStorage:RootPath"];
+        if (string.IsNullOrWhiteSpace(imageRoot))
+        {
+            imageRoot = Path.Combine(AppContext.BaseDirectory, "uploads");
+        }
+        services.AddSingleton<IImageStorage>(new LocalImageStorage(imageRoot));
         return services;
     }
 }

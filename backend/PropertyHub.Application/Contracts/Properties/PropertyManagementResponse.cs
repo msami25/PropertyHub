@@ -20,4 +20,5 @@ public sealed record PropertyManagementResponse(
     AvailabilityStatus AvailabilityStatus,
     string? RejectionReason,
     DateTime CreatedAtUtc,
-    DateTime UpdatedAtUtc);
+    DateTime UpdatedAtUtc,
+    IReadOnlyList<PropertyImageResponse> Images);

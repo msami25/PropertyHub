@@ -12,4 +12,5 @@ public sealed record PropertySummaryResponse(
     decimal Area,
     AreaUnit AreaUnit,
     int? Bedrooms,
-    int? Bathrooms);
+    int? Bathrooms,
+    string? PrimaryImageUrl);
