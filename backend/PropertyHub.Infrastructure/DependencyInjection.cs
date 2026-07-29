@@ -38,6 +38,7 @@ public static class DependencyInjection
             .AddSignInManager()
             .AddEntityFrameworkStores<ApplicationDbContext>();
         services.AddScoped<IUserAccountRepository, IdentityUserAccountRepository>();
+        services.AddScoped<IAdminUserRepository, AdminUserRepository>();
         services.AddScoped<ICityRepository, CityRepository>();
         services.AddScoped<IPropertyRepository, PropertyRepository>();
         services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();

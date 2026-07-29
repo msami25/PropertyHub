@@ -21,6 +21,7 @@ builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<IPropertyService, PropertyService>();
 builder.Services.AddScoped<IPropertyImageService, PropertyImageService>();
 builder.Services.AddScoped<IPropertyWeatherService, PropertyWeatherService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddSingleton<PropertyImageValidator>();
 builder.Services.AddPropertyHubAuthentication(builder.Configuration);
 builder.Services.AddControllers().AddJsonOptions(options =>

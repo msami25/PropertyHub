@@ -13,6 +13,7 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<SellerProfile> SellerProfiles => Set<SellerProfile>();
     public DbSet<Property> Properties => Set<Property>();
     public DbSet<PropertyImage> PropertyImages => Set<PropertyImage>();
+    public DbSet<UserStatusChange> UserStatusChanges => Set<UserStatusChange>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
