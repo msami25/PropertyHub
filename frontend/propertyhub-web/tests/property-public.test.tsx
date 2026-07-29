@@ -43,6 +43,9 @@ describe("public property pages", () => {
   });
 
   it("renders public details without a contact number", () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({
+      isAvailable: false
+    })));
     render(<AuthProvider><App url={`/properties/${summary.id}`} initialPublicData={{
       kind: "property-detail",
       property: {
@@ -66,6 +69,53 @@ describe("public property pages", () => {
     expect(screen.getByRole("img", { name: `${summary.title} primary image` }))
       .toHaveAttribute("src", expect.stringContaining("/api/properties/property-id/images/image-id"));
     expect(screen.queryByText(/contact/i)).not.toBeInTheDocument();
+  });
+
+  it("shows current city weather without exposing provider details", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({
+      isAvailable: true,
+      temperatureCelsius: 32.4,
+      relativeHumidityPercent: 58,
+      windSpeedKilometresPerHour: 12.3,
+      condition: "Partly cloudy",
+      observedAtUtc: "2026-07-29T06:00:00Z"
+    })));
+    render(<AuthProvider><App url={`/properties/${summary.id}`} initialPublicData={{
+      kind: "property-detail",
+      property: {
+        ...summary,
+        description: "A complete public description for this approved property.",
+        address: "Model Town",
+        sellerDisplayName: "Property Owner",
+        images: []
+      }
+    }} /></AuthProvider>);
+
+    expect(await screen.findByText("Partly cloudy")).toBeInTheDocument();
+    expect(screen.getByText("32.4 °C")).toBeInTheDocument();
+    expect(screen.getByText("58%")).toBeInTheDocument();
+    expect(screen.getByText("12.3 km/h")).toBeInTheDocument();
+    expect(screen.queryByText(/Open-Meteo/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps property details visible when weather fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("weather offline")));
+    render(<AuthProvider><App url={`/properties/${summary.id}`} initialPublicData={{
+      kind: "property-detail",
+      property: {
+        ...summary,
+        description: "A complete public description for this approved property.",
+        address: "Model Town",
+        sellerDisplayName: "Property Owner",
+        images: []
+      }
+    }} /></AuthProvider>);
+
+    expect(await screen.findByText(/Current weather is temporarily unavailable/))
+      .toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: summary.title })).toBeInTheDocument();
+    expect(screen.getByText("A complete public description for this approved property."))
+      .toBeInTheDocument();
   });
 
   it("shows a recoverable API error state", async () => {
