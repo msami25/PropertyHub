@@ -178,8 +178,12 @@ default.
 ### 20. Finalize honest submission evidence
 
 - **Prompt:** Complete README, UAT, scope cuts, top-20 prompt log, committed coverage reports, small
-  local commits, and report any acceptance criteria that remain unverified without pushing.
+  local commits, and report any acceptance criteria that remain unverified without pushing. Then
+  prepare practical, timed, word-for-word technical and non-technical Loom scripts from the actual
+  implementation and evidence without recording videos or exposing secrets.
 - **Impact:** Aligned the repository evidence with the actual final implementation and command
-  results.
+  results, and converted the remaining external recording task into a safe, repeatable walkthrough.
 - **Review:** The final Gate report uses only PASS, FAIL, BLOCKED, or DEFERRED. Missing Loom videos
-  remain BLOCKED rather than being described as complete, and all commits remain local.
+  remain BLOCKED rather than being described as complete. The scripts use the verified routes,
+  79 backend tests, 31 current frontend tests, 91.2% coverage, Docker/UAT evidence, safe demo data,
+  weather fallback wording, and explicit on-screen secrecy warnings.
