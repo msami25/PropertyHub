@@ -4,6 +4,7 @@ import {
   propertyImageUrl,
   type PropertyDetail
 } from "../api/propertyApi";
+import { PropertyWeather } from "../components/PropertyWeather";
 
 interface PropertyDetailPageProps {
   propertyId: string;
@@ -53,6 +54,7 @@ export function PropertyDetailPage({
           <div><dt>Listed by</dt><dd>{property.sellerDisplayName}</dd></div>
         </dl>
       </section>
+      <PropertyWeather propertyId={property.id} cityName={property.city.name} />
     </main>
   );
 }

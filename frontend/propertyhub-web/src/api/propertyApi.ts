@@ -26,6 +26,15 @@ export interface PropertyImagesResponse {
   moderationStatus: ModerationStatus;
 }
 
+export interface PropertyWeather {
+  isAvailable: boolean;
+  temperatureCelsius: number | null;
+  relativeHumidityPercent: number | null;
+  windSpeedKilometresPerHour: number | null;
+  condition: string | null;
+  observedAtUtc: string | null;
+}
+
 export interface PropertySummary {
   id: string;
   title: string;
@@ -144,6 +153,10 @@ export async function listPublicProperties(filters: PropertyFilters = {}, isServ
 
 export function getPublicProperty(propertyId: string, isServer = false) {
   return request<PropertyDetail>(`/api/properties/${propertyId}`, { isServer });
+}
+
+export function getPropertyWeather(propertyId: string) {
+  return request<PropertyWeather>(`/api/properties/${propertyId}/weather`);
 }
 
 export async function listActiveCities(isServer = false) {

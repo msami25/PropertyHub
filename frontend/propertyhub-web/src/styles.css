@@ -264,6 +264,27 @@ button:disabled {
   font-weight: 700;
 }
 
+.weather-panel dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 1rem;
+}
+
+.weather-panel dt {
+  color: #475467;
+  font-size: 0.85rem;
+}
+
+.weather-panel dd {
+  margin: 0.25rem 0 0;
+  font-weight: 700;
+}
+
+.weather-condition {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
 @media (max-width: 48rem) {
   header,
   nav,
