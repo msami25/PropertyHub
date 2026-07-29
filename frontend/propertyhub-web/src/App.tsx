@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "./auth/AuthContext";
 import { LoginPage } from "./pages/LoginPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { AdminDashboardPage } from "./pages/AdminDashboardPage";
 import { CityManagementPage } from "./pages/CityManagementPage";
 import { MyPropertiesPage } from "./pages/MyPropertiesPage";
 import { PropertyDetailPage } from "./pages/PropertyDetailPage";
@@ -127,7 +128,19 @@ export function App({ url = "/", initialPublicData }: Readonly<AppProps>) {
           />
         );
       }
-      return <FoundationPage title="Administration" />;
+      if (pathname === "/admin" || pathname === "/admin/users") {
+        return (
+          <AdminDashboardPage
+            accessToken={session.accessToken}
+            currentUserId={session.user.id}
+            onSessionExpired={() => {
+              logout();
+              navigate("/login?returnUrl=/admin");
+            }}
+          />
+        );
+      }
+      return <FoundationPage title="Page not found" />;
     }
     return <FoundationPage title="Page not found" />;
   }
@@ -143,6 +156,7 @@ export function App({ url = "/", initialPublicData }: Readonly<AppProps>) {
               <ClientLink href="/my/properties" navigate={navigate}>My properties</ClientLink>
               {session.user.role === "Admin" && (
                 <>
+                  <ClientLink href="/admin" navigate={navigate}>Admin dashboard</ClientLink>
                   <ClientLink href="/admin/properties" navigate={navigate}>Moderation</ClientLink>
                   <ClientLink href="/admin/cities" navigate={navigate}>Cities</ClientLink>
                 </>

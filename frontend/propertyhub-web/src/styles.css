@@ -285,10 +285,79 @@ button:disabled {
   font-weight: 700;
 }
 
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1rem;
+}
+
+.metric-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #dce2ec;
+  border-radius: 0.6rem;
+}
+
+.metric-card span,
+.table-subtext {
+  display: block;
+  color: #475467;
+  font-size: 0.85rem;
+}
+
+.metric-card strong {
+  font-size: 1.75rem;
+}
+
+.inline-form,
+.admin-action,
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inline-form {
+  max-width: none;
+}
+
+.admin-action input {
+  min-width: 12rem;
+}
+
+.pagination {
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 @media (max-width: 48rem) {
   header,
   nav,
   .page-heading,
+  .section-heading,
+  .inline-form,
+  .admin-action,
   .button-row {
     align-items: flex-start;
     flex-wrap: wrap;
