@@ -79,7 +79,7 @@ registration, login, role enforcement, disabled accounts, and invalid tokens.
   uses a domain-specific repository, and EF Core alone handles persistence. Tests verify owner
   isolation, 401/403 behavior, inactive cities, duplicate prevention, moderation visibility,
   disabled-owner filtering, terminal Sold/Rented states, public-data privacy, and React journeys.
-  Docker evidence remains honestly blocked by the local engine rather than being marked passed.
+  Live Docker evidence later confirmed those workflows while exposing a direct-route SSR failure.
 
 ## Security
 
@@ -96,6 +96,18 @@ validation, per-request account-status checks, rate limiting, and safe Admin see
   production-shaped API/SSR containers, not only the in-memory integration host.
 - **Review:** The live probe covered health, registration, login, seeded Admin access, 401/403
   behavior, and immediate rejection of a disabled account's existing JWT.
+
+### 9. Resume the blocked Phase 4 Docker UAT
+
+- **Prompt:** With Docker Desktop healthy again, run only the blocked Compose build and live Phase 4
+  UAT, preserve named volumes, update evidence, and commit documentation only.
+- **Why it mattered:** Converted an environmental blocker into actual container evidence without
+  expanding into Phase 5 or rewriting completed Phase 4 code.
+- **Review:** Images built and all services became healthy. SQL-backed Property CRUD, authorization,
+  moderation, public visibility, public SSR privacy, and hydrated owner/Admin UI routes passed.
+  Direct private-route requests returned HTTP 500 because the SSR serializer receives undefined
+  public-page data. The UAT was therefore recorded as `FAIL`, and application code was left
+  unchanged as requested.
 
 ## Documentation
 

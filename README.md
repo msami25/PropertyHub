@@ -118,9 +118,10 @@ docker compose --env-file .env.example config --quiet
 
 The local application URL is `http://localhost:3000`, with the API at `http://localhost:8081`.
 Docker startup, automatic migrations, seeded roles/Admin/cities, and the Phase 2–3 authentication
-and City journeys were previously verified. Phase 4 host builds and automated tests pass, but its
-live Docker UAT remains blocked by a local Docker Desktop engine startup failure recorded in
-`docs/UAT_REPORT.md`.
+and City journeys were previously verified. On 2026-07-29, the Phase 4 images built successfully,
+all three services became healthy, the Property migration applied to the preserved SQL volume, and
+the live Property API and public SSR journeys passed. The live UAT still found a private-route SSR
+defect recorded in `docs/UAT_REPORT.md`.
 
 The final startup command will be:
 
@@ -138,4 +139,6 @@ acceptance results will be recorded in `docs/UAT_REPORT.md`.
 
 See `docs/SCOPE_CUTS.md`. Property cards currently use an accessible placeholder because secure
 property images are Phase 5. Open-Meteo, user administration, dashboard metrics, contact reveal,
-and enquiries remain future slices.
+and enquiries remain future slices. Direct browser requests to frontend account routes such as
+`/login`, `/register`, `/my/properties`, and `/admin/properties` currently return HTTP 500;
+client-side navigation to those routes works after entering through a public SSR page.
