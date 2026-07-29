@@ -36,6 +36,7 @@ public static class DependencyInjection
             .AddEntityFrameworkStores<ApplicationDbContext>();
         services.AddScoped<IUserAccountRepository, IdentityUserAccountRepository>();
         services.AddScoped<ICityRepository, CityRepository>();
+        services.AddScoped<IPropertyRepository, PropertyRepository>();
         return services;
     }
 }

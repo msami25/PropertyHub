@@ -18,10 +18,12 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICityService, CityService>();
+builder.Services.AddScoped<IPropertyService, PropertyService>();
 builder.Services.AddPropertyHubAuthentication(builder.Configuration);
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddRateLimiter(options =>
 {
