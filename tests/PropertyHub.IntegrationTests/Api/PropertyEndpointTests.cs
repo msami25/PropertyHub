@@ -111,6 +111,7 @@ public sealed class PropertyEndpointTests(PropertyHubWebApplicationFactory facto
 
         client.DefaultRequestHeaders.Authorization = null;
         var hiddenBeforeApproval = await client.GetAsync($"/api/properties/{property.Id}");
+        var hiddenWeather = await client.GetAsync($"/api/properties/{property.Id}/weather");
         var missingAdminToken = await client.PostAsJsonAsync(
             $"/api/admin/properties/{property.Id}/moderation",
             new ModeratePropertyRequest(ModerationStatus.Approved, null));
@@ -128,14 +129,19 @@ public sealed class PropertyEndpointTests(PropertyHubWebApplicationFactory facto
 
         client.DefaultRequestHeaders.Authorization = null;
         var publicDetail = await client.GetAsync($"/api/properties/{property.Id}");
+        var weather = await client.GetAsync($"/api/properties/{property.Id}/weather");
         var publicList = await client.GetFromJsonAsync<PropertyListResponse>(
             $"/api/properties?cityId={LahoreId}&purpose=Sale&propertyType=House",
             JsonOptions);
 
         hiddenBeforeApproval.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        hiddenWeather.StatusCode.Should().Be(HttpStatusCode.NotFound);
         missingAdminToken.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         userModeration.StatusCode.Should().Be(HttpStatusCode.Forbidden);
         publicDetail.StatusCode.Should().Be(HttpStatusCode.OK);
+        weather.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await ReadAsync<PropertyHub.Application.Contracts.Weather.PropertyWeatherResponse>(weather))
+            .IsAvailable.Should().BeFalse();
         publicList!.Items.Should().Contain(item => item.Id == property.Id);
     }
 

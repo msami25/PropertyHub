@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using PropertyHub.Infrastructure.Data;
+using PropertyHub.Application.Interfaces.Services;
+using PropertyHub.Application.Models.Weather;
 
 namespace PropertyHub.IntegrationTests.Infrastructure;
 
@@ -43,6 +45,8 @@ public sealed class PropertyHubWebApplicationFactory : WebApplicationFactory<Pro
             services.RemoveAll<DbContextOptions<ApplicationDbContext>>();
             services.AddDbContext<ApplicationDbContext>(
                 options => options.UseInMemoryDatabase(_databaseName));
+            services.RemoveAll<IOpenMeteoWeatherClient>();
+            services.AddSingleton<IOpenMeteoWeatherClient, UnavailableWeatherClient>();
         });
     }
 
@@ -53,5 +57,15 @@ public sealed class PropertyHubWebApplicationFactory : WebApplicationFactory<Pro
         {
             Directory.Delete(_imageRoot, recursive: true);
         }
+    }
+
+    private sealed class UnavailableWeatherClient : IOpenMeteoWeatherClient
+    {
+        public Task<CurrentWeather?> GetCurrentAsync(
+            Guid cityId,
+            decimal latitude,
+            decimal longitude,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<CurrentWeather?>(null);
     }
 }
