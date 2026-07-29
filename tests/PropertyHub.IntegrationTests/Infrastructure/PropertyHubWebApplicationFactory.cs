@@ -12,6 +12,9 @@ namespace PropertyHub.IntegrationTests.Infrastructure;
 public sealed class PropertyHubWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly string _databaseName = $"PropertyHubTests-{Guid.NewGuid()}";
+    private readonly string _imageRoot = Path.Combine(
+        Path.GetTempPath(),
+        $"PropertyHubImages-{Guid.NewGuid():N}");
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -31,7 +34,8 @@ public sealed class PropertyHubWebApplicationFactory : WebApplicationFactory<Pro
                 ["Jwt:AccessTokenMinutes"] = "30",
                 ["SeedAdmin:Email"] = "admin@propertyhub.test",
                 ["SeedAdmin:Password"] = "TestingAdmin!123",
-                ["SeedAdmin:FullName"] = "Test Administrator"
+                ["SeedAdmin:FullName"] = "Test Administrator",
+                ["ImageStorage:RootPath"] = _imageRoot
             });
         });
         builder.ConfigureServices(services =>
@@ -40,5 +44,14 @@ public sealed class PropertyHubWebApplicationFactory : WebApplicationFactory<Pro
             services.AddDbContext<ApplicationDbContext>(
                 options => options.UseInMemoryDatabase(_databaseName));
         });
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing && Directory.Exists(_imageRoot))
+        {
+            Directory.Delete(_imageRoot, recursive: true);
+        }
     }
 }

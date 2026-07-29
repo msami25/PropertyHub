@@ -60,6 +60,7 @@ public sealed class PropertyEndpointTests(PropertyHubWebApplicationFactory facto
         await RegisterAndAuthenticateAsync(client, $"first-{Guid.NewGuid():N}@propertyhub.test");
         var create = await client.PostAsJsonAsync("/api/properties", ValidCreate());
         var property = await ReadAsync<PropertyManagementResponse>(create);
+        await UploadImageAsync(client, property.Id);
 
         await RegisterAndAuthenticateAsync(client, $"second-{Guid.NewGuid():N}@propertyhub.test");
         var crossRead = await client.GetAsync($"/api/users/me/properties/{property.Id}");
@@ -104,6 +105,7 @@ public sealed class PropertyEndpointTests(PropertyHubWebApplicationFactory facto
         await RegisterAndAuthenticateAsync(client, $"moderation-{Guid.NewGuid():N}@propertyhub.test");
         var create = await client.PostAsJsonAsync("/api/properties", ValidCreate());
         var property = await ReadAsync<PropertyManagementResponse>(create);
+        await UploadImageAsync(client, property.Id);
 
         client.DefaultRequestHeaders.Authorization = null;
         var hiddenBeforeApproval = await client.GetAsync($"/api/properties/{property.Id}");
@@ -143,6 +145,7 @@ public sealed class PropertyEndpointTests(PropertyHubWebApplicationFactory facto
         await RegisterAndAuthenticateAsync(client, ownerEmail);
         var create = await client.PostAsJsonAsync("/api/properties", ValidCreate());
         var property = await ReadAsync<PropertyManagementResponse>(create);
+        await UploadImageAsync(client, property.Id);
 
         await AuthenticateAsync(client, "admin@propertyhub.test", "TestingAdmin!123");
         await client.PostAsJsonAsync(
@@ -173,6 +176,7 @@ public sealed class PropertyEndpointTests(PropertyHubWebApplicationFactory facto
             $"disabled-owner-{Guid.NewGuid():N}@propertyhub.test");
         var create = await client.PostAsJsonAsync("/api/properties", ValidCreate());
         var property = await ReadAsync<PropertyManagementResponse>(create);
+        await UploadImageAsync(client, property.Id);
 
         await AuthenticateAsync(client, "admin@propertyhub.test", "TestingAdmin!123");
         var invalidReject = await client.PostAsJsonAsync(
@@ -250,6 +254,17 @@ public sealed class PropertyEndpointTests(PropertyHubWebApplicationFactory facto
         var token = await response.Content.ReadFromJsonAsync<AuthTokenResponse>();
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", token!.AccessToken);
+    }
+
+    private static async Task UploadImageAsync(HttpClient client, Guid propertyId)
+    {
+        using var content = new MultipartFormDataContent();
+        using var image = new ByteArrayContent(
+            [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00]);
+        image.Headers.ContentType = new MediaTypeHeaderValue("image/png");
+        content.Add(image, "images", "property.png");
+        var response = await client.PostAsync($"/api/properties/{propertyId}/images", content);
+        response.EnsureSuccessStatusCode();
     }
 
     private static async Task<T> ReadAsync<T>(HttpResponseMessage response) =>

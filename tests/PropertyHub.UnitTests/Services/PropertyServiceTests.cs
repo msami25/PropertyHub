@@ -178,6 +178,18 @@ public sealed class PropertyServiceTests
     public async Task ModerateAsync_ShouldRequireReasonAndApprovePendingProperty()
     {
         var property = ExistingProperty();
+        property.Images.Add(new PropertyImage
+        {
+            Id = Guid.NewGuid(),
+            PropertyId = property.Id,
+            RelativePath = $"{property.Id:N}/image.jpg",
+            StoredFileName = "image.jpg",
+            OriginalFileName = "image.jpg",
+            ContentType = "image/jpeg",
+            FileSizeBytes = 3,
+            SortOrder = 1,
+            IsPrimary = true
+        });
         _propertyRepository.Setup(repository => repository.GetForModerationAsync(
                 property.Id,
                 It.IsAny<CancellationToken>()))
