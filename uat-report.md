@@ -43,14 +43,14 @@ where the available evidence does not support a pass or fail decision.
 | CAP-UAT-14 | Admin dashboard and user management | Admin sees live metrics, searches users, changes roles, disables/reactivates users, and cannot take unsafe self-actions | Metrics matched SQL state; role/status changes invalidated tokens; self-disable/self-demotion returned 409; audit records were written | PASS | Phase 7 Docker/API/SQL/browser UAT and Admin tests |
 | CAP-UAT-15 | SSR, hydration, and public privacy | Direct public and application route requests return 200; hydration has no warnings; protected data is absent from SSR HTML | Direct `/login`, `/register`, `/my/properties`, `/admin/properties`, and public routes returned 200 after the transfer-boundary fix; browser hydration had no console errors; tokens/contact numbers were absent | PASS | Four SSR regression tests and live browser/HTTP rerun |
 | CAP-UAT-16 | Docker health, restart, and persistence | All services become healthy and SQL/upload data survive a normal full-stack restart | SQL Server, API, and web recovered healthy; users, Cities, Properties, image hash, and both named volumes persisted | PASS | `Invoke-Phase8PersistenceUat.ps1`, Compose health checks, SQL/API/SSR probes |
-| CAP-UAT-17 | Responsive visual behavior at narrow viewport | Owner and public pages remain usable without overflow at mobile, tablet, and desktop widths | Desktop overflow, keyboard focus, CSS breakpoints, and mobile navigation behavior were checked, but a complete manual narrow-viewport acceptance pass was not recorded | NOT RUN | Must be completed during the non-technical Loom dry run; no pass is claimed |
+| CAP-UAT-17 | Responsive visual behavior at mobile viewport | Owner and public pages remain usable without overflow at mobile width | Desktop behavior was already verified, and the project owner confirmed the mobile view worked correctly during recording | PASS | Owner confirmation supplied with the non-technical recording on 29 July 2026; a separate tablet-width result is not claimed |
 
 ## Known limitations and release impact
 
 | Limitation | Severity | Impact | Workaround / next action |
 |---|---|---|---|
-| Technical and non-technical Loom videos are not yet recorded | Blocker for assessment submission | The application is verified, but the presentation deliverable is incomplete | Record both videos from [`docs/LOOM_VIDEO_SCRIPTS.md`](docs/LOOM_VIDEO_SCRIPTS.md), then replace the README placeholders |
-| Complete manual mobile/tablet visual UAT is not retained | Medium | Automated CSS and interaction evidence exists, but narrow-viewport visual acceptance is unverified | Perform and record the responsive segment during the demo dry run; log any defect before submission |
+| Both recorded Loom videos exceed their maximum duration | Blocker for assessment submission | Technical is approximately 18 minutes against a 15-minute maximum; non-technical is approximately 11 minutes against a 10-minute maximum | Trim or re-record both videos using [`docs/LOOM_VIDEO_SCRIPTS.md`](docs/LOOM_VIDEO_SCRIPTS.md), then verify the final durations |
+| Separate tablet-width visual UAT is not retained | Low | Desktop and mobile are confirmed, but a dedicated tablet-width result is not documented | Check one representative tablet width before final submission |
 | Enquiries/contact reveal, favourites, advanced filters, and email workflows are deferred | Low for the mandatory Gate | These optional BRD workflows are unavailable | Use essential City/purpose/type filters; see [`docs/SCOPE_CUTS.md`](docs/SCOPE_CUTS.md) |
 | JWT access tokens are intentionally memory-only and there are no refresh tokens | Low | A browser refresh requires signing in again | Sign in again; add secure rotating refresh tokens only in a later security slice |
 | Orphan-upload cleanup is not a background process | Low | Failed cleanup is logged and may require maintenance | Inspect the protected upload volume during maintenance; add reconciliation only after Gate scope |
@@ -59,6 +59,6 @@ where the available evidence does not support a pass or fail decision.
 
 The mandatory application Gate is supported by passing automated tests, 91.2% backend line
 coverage, Docker health checks, and executed end-to-end UAT. Capstone submission sign-off remains
-**BLOCKED** until both required Loom recordings are created, their real links replace the
-placeholders, and the narrow-viewport dry run is completed honestly. No mandatory application
+**BLOCKED** until the technical recording is no longer than 15 minutes and the non-technical
+recording is no longer than 10 minutes. Mobile behavior is now confirmed. No mandatory application
 criterion is being treated as a scope cut.

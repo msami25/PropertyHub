@@ -26,8 +26,8 @@ criteria are never marked `DEFERRED`.
 | At least 80% backend coverage and included report | PASS | 91.2%, 2,382/2,610 lines; Cobertura, HTML, and text reports in `docs/coverage/` |
 | Committed UAT script with at least five executed scenarios | PASS | Eight PASS scenarios in `docs/UAT_REPORT.md`; Phase 5, 7, and 8 scripts |
 | Categorized top-20 prompt log | PASS | 20 reviewed entries in `docs/AI_PROMPT_LOG.md` |
-| Loom technical video at most 15 minutes with required content | BLOCKED | Walkthrough outline exists; no recording or externally accessible Loom link was supplied |
-| Loom non-technical video at most 10 minutes with required content | BLOCKED | Demo outline exists; no recording or externally accessible Loom link was supplied |
+| Loom technical video at most 15 minutes with required content | FAIL | [Recording supplied](https://www.loom.com/share/44140a0d4f874900b57b5cedabaa499a), but its reported duration is approximately 18 minutes |
+| Loom non-technical video at most 10 minutes with required content | FAIL | [Recording supplied](https://www.loom.com/share/686d9dcdd6f049288a95b11e90c1a9c2), but its reported duration is approximately 11 minutes |
 
 ## Extended mandatory application checks
 
@@ -63,5 +63,5 @@ criteria are never marked `DEFERRED`.
 | Automated tests and coverage | PASS |
 | Docker rebuild, restart, and persistence | PASS |
 | Repository documentation evidence | PASS |
-| External Loom submission evidence | BLOCKED |
-| Overall submission Gate | BLOCKED |
+| External Loom submission evidence | FAIL |
+| Overall submission Gate | FAIL |

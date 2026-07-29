@@ -15,10 +15,12 @@ The application is built for the Capstone Build Sprint Gate with a .NET 8 Web AP
 Vite SSR, SQL Server, secure local uploads, Open-Meteo weather, and Docker Compose.
 
 > [!IMPORTANT]
-> **Loom submission links are still required.**
+> **Loom recordings are available, but their current durations exceed the assessment limits.**
 >
-> - Technical walkthrough, 10–15 minutes: **LOOM_TECHNICAL_URL_PENDING**
-> - Non-technical demo, 5–10 minutes: **LOOM_DEMO_URL_PENDING**
+> - [Technical walkthrough](https://www.loom.com/share/44140a0d4f874900b57b5cedabaa499a):
+>   approximately 18 minutes; required duration is 10–15 minutes.
+> - [Non-technical demo](https://www.loom.com/share/686d9dcdd6f049288a95b11e90c1a9c2):
+>   approximately 11 minutes; required duration is 5–10 minutes.
 >
 > Recording scripts: [docs/LOOM_VIDEO_SCRIPTS.md](docs/LOOM_VIDEO_SCRIPTS.md)
 
@@ -30,7 +32,7 @@ Vite SSR, SQL Server, secure local uploads, Open-Meteo weather, and Docker Compo
 | Automated tests and coverage | PASS | 79 backend tests; 91.2% backend line coverage |
 | Docker deployment and persistence | PASS | Full rebuild, health, restart, SQL data, and upload persistence UAT |
 | Documentation package | PASS | Architecture, ADRs, UAT, AI log, coverage, and recording scripts |
-| Recorded Loom videos and final links | BLOCKED | The scripts exist; the videos have not been recorded or linked |
+| Recorded Loom videos and final links | FAIL | Links are present, but both current recordings exceed their maximum permitted duration |
 
 PropertyHub delivers three practical benefits:
 
@@ -314,8 +316,8 @@ SSR privacy, hydration, health, restart, and persistence.
 - [Final Gate report](docs/GATE_REPORT.md)
 - [Scope cuts](docs/SCOPE_CUTS.md)
 
-The assessment-facing report contains more than ten acceptance tests and distinguishes verified
-passes from the narrow-screen responsive check that still needs manual execution.
+The assessment-facing report contains more than ten acceptance tests. Desktop and mobile layouts
+have been manually confirmed; a separate retained tablet-width visual check is not claimed.
 
 ## AI collaboration
 
@@ -332,9 +334,11 @@ repository evidence.
 
 ## Known limitations and deferred scope
 
-- The Loom recordings and real URLs remain outstanding.
-- A real 360-pixel browser viewport UAT pass has not been recorded; responsive CSS, desktop
-  overflow, keyboard focus, and component states were verified.
+- Both Loom recordings must be shortened or re-recorded: the current technical video is
+  approximately 18 minutes against a 15-minute maximum, and the non-technical video is
+  approximately 11 minutes against a 10-minute maximum.
+- Desktop and mobile layouts were manually confirmed. A separate tablet-width visual UAT result
+  has not been retained.
 - Authenticated contact reveal, enquiries, MailHog/outbox delivery, favourites, and advanced
   filters remain deferred outside the canonical Gate.
 - Access tokens are intentionally short-lived and memory-only; reloading requires login.
@@ -346,11 +350,14 @@ See [docs/SCOPE_CUTS.md](docs/SCOPE_CUTS.md) for the full rationale.
 ## Recording and submission
 
 - [Technical and non-technical scripts](docs/LOOM_VIDEO_SCRIPTS.md)
-- Technical Loom URL: **LOOM_TECHNICAL_URL_PENDING**
-- Non-technical Loom URL: **LOOM_DEMO_URL_PENDING**
+- [Technical Loom recording](https://www.loom.com/share/44140a0d4f874900b57b5cedabaa499a)
+  — approximately 18 minutes; must be reduced to 15 minutes or less.
+- [Non-technical Loom recording](https://www.loom.com/share/686d9dcdd6f049288a95b11e90c1a9c2)
+  — approximately 11 minutes; must be reduced to 10 minutes or less.
 
-Do not replace these placeholders until both recordings meet their required durations and have
-been reviewed for exposed credentials, tokens, personal data, terminals, or private browser tabs.
+Do not submit these versions as duration-compliant. Trim or re-record them, review the replacements
+for exposed credentials, tokens, personal data, terminals, or private browser tabs, and update the
+links if Loom creates new share URLs.
 
 ## Licence status
 

@@ -1,10 +1,12 @@
 # PropertyHub Loom Recording Guide and Scripts
 
-The two recordings are external submission deliverables. They have not been recorded, and no URL
-is claimed in this repository.
+The first recordings have been supplied, but both exceed the assessment duration limits and must
+be trimmed or re-recorded before submission.
 
-- Technical walkthrough link after recording: `LOOM_TECHNICAL_URL_PENDING`
-- Non-technical demo link after recording: `LOOM_DEMO_URL_PENDING`
+- [Current technical walkthrough](https://www.loom.com/share/44140a0d4f874900b57b5cedabaa499a):
+  approximately 18 minutes; maximum permitted duration is 15 minutes.
+- [Current non-technical demo](https://www.loom.com/share/686d9dcdd6f049288a95b11e90c1a9c2):
+  approximately 11 minutes; maximum permitted duration is 10 minutes.
 
 The scripts use only implemented behavior and retained evidence. Speak at a calm conversational
 pace, follow the prepared screen sequence, and do not pause to troubleshoot during a recording.
@@ -548,12 +550,13 @@ rules, resilient local information, and persistent local deployment in one pract
 
 ## After recording
 
-1. Confirm the technical recording is between 10 and 15 minutes.
-2. Confirm the non-technical recording is between 5 and 10 minutes.
+1. Trim or re-record the technical walkthrough and confirm it is between 10 and 15 minutes.
+2. Trim or re-record the non-technical demo and confirm it is between 5 and 10 minutes.
 3. Review both videos for accidental secrets, tokens, contact data, notifications, or unrelated
    tabs before sharing.
 4. Set the sharing permissions required by the assessment and test both links in a signed-out
    browser.
-5. Replace `LOOM_TECHNICAL_URL_PENDING` and `LOOM_DEMO_URL_PENDING` in this file and `README.md`
-   with the real URLs.
-6. Re-run the Markdown link check and `git diff --check`, then commit the two link updates.
+5. If Loom creates replacement share URLs, update this file, `README.md`, and
+   `docs/GATE_REPORT.md`.
+6. Re-run the Markdown link check and `git diff --check`, then commit the corrected recording
+   evidence.
