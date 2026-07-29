@@ -12,6 +12,8 @@ public sealed class PropertyImageConfiguration : IEntityTypeConfiguration<Proper
         builder.Property(image => image.StoredFileName).HasMaxLength(255).IsRequired();
         builder.Property(image => image.RelativePath).HasMaxLength(500).IsRequired();
         builder.Property(image => image.ContentType).HasMaxLength(50).IsRequired();
+        builder.Property(image => image.Width).IsRequired();
+        builder.Property(image => image.Height).IsRequired();
         builder.Property(image => image.UploadedAtUtc).HasPrecision(0);
         builder.HasIndex(image => image.StoredFileName).IsUnique();
         builder.HasIndex(image => image.RelativePath).IsUnique();

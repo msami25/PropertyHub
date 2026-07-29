@@ -9,6 +9,8 @@ public sealed class PropertyImage
     public string RelativePath { get; set; } = string.Empty;
     public string ContentType { get; set; } = string.Empty;
     public long FileSizeBytes { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
     public byte SortOrder { get; set; }
     public bool IsPrimary { get; set; }
     public DateTime UploadedAtUtc { get; set; } = DateTime.UtcNow;

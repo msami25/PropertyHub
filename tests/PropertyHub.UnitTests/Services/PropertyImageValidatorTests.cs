@@ -1,5 +1,7 @@
 using FluentAssertions;
 using PropertyHub.Application.Services;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace PropertyHub.UnitTests.Services;
 
@@ -14,7 +16,7 @@ public sealed class PropertyImageValidatorTests
         string fileName,
         string contentType)
     {
-        byte[] content = [0xFF, 0xD8, 0xFF, 0x00];
+        var content = CreateImage("jpeg");
 
         var result = _validator.Validate(fileName, contentType, content.Length, content);
 
@@ -25,7 +27,7 @@ public sealed class PropertyImageValidatorTests
     [Fact]
     public void Validate_ShouldAcceptPngAndStripClientPath()
     {
-        byte[] content = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+        var content = CreateImage("png");
 
         var result = _validator.Validate(
             @"C:\client\property.png",
@@ -40,11 +42,7 @@ public sealed class PropertyImageValidatorTests
     [Fact]
     public void Validate_ShouldAcceptWebPWithMatchingSignature()
     {
-        byte[] content =
-        [
-            0x52, 0x49, 0x46, 0x46, 0x04, 0x00, 0x00, 0x00,
-            0x57, 0x45, 0x42, 0x50
-        ];
+        var content = CreateImage("webp");
 
         var result = _validator.Validate(
             "property.webp",
@@ -97,5 +95,54 @@ public sealed class PropertyImageValidatorTests
 
         result.IsValid.Should().BeFalse();
         result.Error.Should().Contain("5 MB");
+    }
+
+    [Fact]
+    public void Validate_ShouldRejectExcessiveDimensions()
+    {
+        var content = CreateImage("png", PropertyImageValidator.MaximumDimensionPixels + 1, 1);
+
+        var result = _validator.Validate(
+            "property.png",
+            "image/png",
+            content.Length,
+            content);
+
+        result.IsValid.Should().BeFalse();
+        result.Error.Should().Contain("8,000 pixels");
+    }
+
+    [Fact]
+    public void Validate_ShouldRejectTruncatedImageEvenWhenMagicBytesMatch()
+    {
+        byte[] content = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
+
+        var result = _validator.Validate(
+            "property.png",
+            "image/png",
+            content.Length,
+            content);
+
+        result.IsValid.Should().BeFalse();
+        result.Error.Should().Contain("invalid");
+    }
+
+    private static byte[] CreateImage(string format, int width = 1, int height = 1)
+    {
+        using var image = new Image<Rgba32>(width, height);
+        using var stream = new MemoryStream();
+        switch (format)
+        {
+            case "jpeg":
+                image.SaveAsJpeg(stream);
+                break;
+            case "webp":
+                image.SaveAsWebp(stream);
+                break;
+            default:
+                image.SaveAsPng(stream);
+                break;
+        }
+        return stream.ToArray();
     }
 }

@@ -11,6 +11,8 @@ using PropertyHub.Application.Contracts.Properties;
 using PropertyHub.Domain.Enums;
 using PropertyHub.IntegrationTests.Infrastructure;
 using PropertyHub.Infrastructure.Data;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace PropertyHub.IntegrationTests.Api;
 
@@ -18,8 +20,7 @@ public sealed class PropertyImageEndpointTests(PropertyHubWebApplicationFactory 
     : IClassFixture<PropertyHubWebApplicationFactory>
 {
     private static readonly Guid LahoreId = Guid.Parse("10000000-0000-4000-8000-000000000001");
-    private static readonly byte[] PngBytes =
-        [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00];
+    private static readonly byte[] PngBytes = CreatePng();
     private static readonly JsonSerializerOptions JsonOptions = CreateJsonOptions();
 
     [Fact]
@@ -61,6 +62,7 @@ public sealed class PropertyImageEndpointTests(PropertyHubWebApplicationFactory 
         var publicImage = await client.GetAsync(first.Url);
         publicImage.StatusCode.Should().Be(HttpStatusCode.OK);
         publicImage.Headers.CacheControl!.Public.Should().BeTrue();
+        publicImage.Headers.GetValues("X-Content-Type-Options").Should().ContainSingle("nosniff");
 
         await AuthenticateAsync(client, ownerEmail, "StrongPass!123");
         var primary = await client.PutAsync(
@@ -128,7 +130,9 @@ public sealed class PropertyImageEndpointTests(PropertyHubWebApplicationFactory 
         stored.Should().HaveCount(5);
         stored.Should().OnlyContain(image =>
             !image.RelativePath.Contains("..")
-            && image.StoredFileName != image.OriginalFileName);
+            && image.StoredFileName != image.OriginalFileName
+            && image.Width == 1
+            && image.Height == 1);
     }
 
     [Fact]
@@ -212,5 +216,13 @@ public sealed class PropertyImageEndpointTests(PropertyHubWebApplicationFactory 
         var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
         options.Converters.Add(new JsonStringEnumConverter());
         return options;
+    }
+
+    private static byte[] CreatePng()
+    {
+        using var image = new Image<Rgba32>(1, 1);
+        using var stream = new MemoryStream();
+        image.SaveAsPng(stream);
+        return stream.ToArray();
     }
 }

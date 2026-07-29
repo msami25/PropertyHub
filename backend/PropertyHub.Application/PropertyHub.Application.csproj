@@ -2,4 +2,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PropertyHub.Domain\PropertyHub.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
+  </ItemGroup>
 </Project>

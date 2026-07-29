@@ -69,9 +69,9 @@ var app = builder.Build();
 await app.Services.InitialiseDatabaseAsync(app.Environment);
 
 app.UseExceptionHandler();
-app.UseRateLimiter();
 app.UseCors();
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health/live", new HealthCheckOptions

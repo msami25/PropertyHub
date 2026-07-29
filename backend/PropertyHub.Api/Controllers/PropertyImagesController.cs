@@ -114,6 +114,7 @@ public sealed class PropertyImagesController(
         Response.Headers.CacheControl = image.IsPublic
             ? "public,max-age=300"
             : "private,no-store";
+        Response.Headers.XContentTypeOptions = "nosniff";
         return File(image.Content, image.ContentType, enableRangeProcessing: true);
     }
 

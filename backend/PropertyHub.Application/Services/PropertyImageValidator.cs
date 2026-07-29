@@ -1,4 +1,5 @@
 using PropertyHub.Application.Models.Properties;
+using SixLabors.ImageSharp;
 
 namespace PropertyHub.Application.Services;
 
@@ -6,6 +7,8 @@ public sealed class PropertyImageValidator
 {
     public const int MaximumImageCount = 5;
     public const int MaximumFileSizeBytes = 5 * 1024 * 1024;
+    public const int MaximumDimensionPixels = 8_000;
+    public const long MaximumPixelCount = 40_000_000;
 
     private static readonly IReadOnlyDictionary<string, string> ContentTypesByExtension =
         new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -58,10 +61,40 @@ public sealed class PropertyImageValidator
             "image/webp" => ".webp",
             _ => throw new InvalidOperationException("Unsupported image content type.")
         };
+
+        int width;
+        int height;
+        try
+        {
+            using var image = Image.Load(content);
+            width = image.Width;
+            height = image.Height;
+        }
+        catch (UnknownImageFormatException)
+        {
+            return PropertyImageValidationResult.Invalid(
+                "The file is not a decodable JPEG, PNG, or WebP image.");
+        }
+        catch (InvalidImageContentException)
+        {
+            return PropertyImageValidationResult.Invalid(
+                "The image content is incomplete or invalid.");
+        }
+
+        if (width is < 1 or > MaximumDimensionPixels
+            || height is < 1 or > MaximumDimensionPixels
+            || (long)width * height > MaximumPixelCount)
+        {
+            return PropertyImageValidationResult.Invalid(
+                "Image dimensions must be at most 8,000 pixels per side and 40 megapixels.");
+        }
+
         return PropertyImageValidationResult.Valid(
             expectedContentType,
             canonicalExtension,
-            safeFileName);
+            safeFileName,
+            width,
+            height);
     }
 
     private static string? DetectContentType(ReadOnlySpan<byte> content)

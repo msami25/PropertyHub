@@ -67,6 +67,8 @@ public sealed class PropertyImageService(
                 validation.SafeOriginalFileName!,
                 validation.CanonicalContentType!,
                 validation.CanonicalExtension!,
+                validation.Width!.Value,
+                validation.Height!.Value,
                 bytes));
         }
 
@@ -97,6 +99,8 @@ public sealed class PropertyImageService(
                     RelativePath = relativePath,
                     ContentType = upload.ContentType,
                     FileSizeBytes = upload.Content.LongLength,
+                    Width = upload.Width,
+                    Height = upload.Height,
                     SortOrder = availableSortOrders[index],
                     IsPrimary = !hasPrimary && index == 0,
                     UploadedAtUtc = timeProvider.GetUtcNow().UtcDateTime
@@ -295,5 +299,7 @@ public sealed class PropertyImageService(
         string OriginalFileName,
         string ContentType,
         string Extension,
+        int Width,
+        int Height,
         byte[] Content);
 }

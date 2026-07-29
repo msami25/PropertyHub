@@ -12,6 +12,8 @@ using PropertyHub.Domain.Enums;
 using PropertyHub.IntegrationTests.Infrastructure;
 using PropertyHub.Infrastructure.Data;
 using PropertyHub.Infrastructure.Identity;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace PropertyHub.IntegrationTests.Api;
 
@@ -259,8 +261,10 @@ public sealed class PropertyEndpointTests(PropertyHubWebApplicationFactory facto
     private static async Task UploadImageAsync(HttpClient client, Guid propertyId)
     {
         using var content = new MultipartFormDataContent();
-        using var image = new ByteArrayContent(
-            [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00]);
+        using var source = new Image<Rgba32>(1, 1);
+        using var stream = new MemoryStream();
+        source.SaveAsPng(stream);
+        using var image = new ByteArrayContent(stream.ToArray());
         image.Headers.ContentType = new MediaTypeHeaderValue("image/png");
         content.Add(image, "images", "property.png");
         var response = await client.PostAsync($"/api/properties/{propertyId}/images", content);

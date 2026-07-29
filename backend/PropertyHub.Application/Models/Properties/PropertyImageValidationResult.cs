@@ -5,14 +5,18 @@ public sealed record PropertyImageValidationResult(
     string? Error = null,
     string? CanonicalContentType = null,
     string? CanonicalExtension = null,
-    string? SafeOriginalFileName = null)
+    string? SafeOriginalFileName = null,
+    int? Width = null,
+    int? Height = null)
 {
     public static PropertyImageValidationResult Invalid(string error) => new(false, error);
 
     public static PropertyImageValidationResult Valid(
         string contentType,
         string extension,
-        string originalFileName) =>
+        string originalFileName,
+        int width,
+        int height) =>
         new(true, CanonicalContentType: contentType, CanonicalExtension: extension,
-            SafeOriginalFileName: originalFileName);
+            SafeOriginalFileName: originalFileName, Width: width, Height: height);
 }
