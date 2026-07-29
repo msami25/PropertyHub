@@ -2,9 +2,9 @@
 
 The complete Gate UAT remains `BLOCKED` until all mandatory phases are implemented and exercised.
 Phase 2 authentication and Phase 3 City CRUD were manually exercised against the Docker
-environment on 2026-07-28. Phase 4 automated workflows pass and live Docker execution completed on
-2026-07-29. The direct-route SSR defect found during the first execution was fixed, and the affected
-Docker and browser checks passed on rerun.
+environment on 2026-07-28. Phase 4 and Phase 5 automated workflows pass and live Docker execution
+completed on 2026-07-29. The direct-route SSR defect found during Phase 4 was fixed, and the
+affected Docker and browser checks passed on rerun.
 
 | ID | Scenario | Expected result | Actual result | Evidence | Status |
 |---|---|---|---|---|---|
@@ -12,7 +12,7 @@ Docker and browser checks passed on rerun.
 | UAT-02 | Enforce authorization | Missing/invalid tokens return 401, User-to-Admin access returns 403, and disabled accounts cannot log in or reuse a token | Missing and invalid tokens returned 401; User-to-Admin, disabled login, and disabled existing token returned 403; seeded Admin access returned 200 | Docker HTTP/SQL probe; `AuthenticationEndpointTests` | PASS |
 | UAT-03 | Complete City CRUD | Admin lists, creates, edits, and deletes an unused City; referenced deletion returns 409 | Seeded Admin completed create/read/update/delete through Docker API and create/edit/delete through the browser UI; invalid input returned 400, duplicates and referenced deletion returned 409 | Docker HTTP/SQL and browser probes; `CityEndpointTests`; `CityServiceTests`; `city-management.test.tsx` | PASS |
 | UAT-04 | Complete Property CRUD | Owner creates, views, edits, marks availability, and deletes a listing; Admin moderation controls public visibility | SQL-backed Property workflow, authorization, moderation, public visibility, direct SSR routes, owner/Admin login, hydration, and public-data privacy passed after the SSR transfer fix | Docker Compose/API/SQL/browser probes; `PropertyEndpointTests`; `PropertyServiceTests`; 22 frontend tests | PASS |
-| UAT-05 | Upload property images | Valid images persist and display; unsafe input is rejected | Not implemented | Pending | BLOCKED |
+| UAT-05 | Upload property images | Valid images persist and display; unsafe input is rejected | Owner uploaded two decoded PNGs, changed the primary image, deleted a non-last image, and received 409 for last-image deletion; invalid signature returned 400; hidden/public access followed moderation; SSR and hydrated pages displayed the image; the image remained available after API recreation | Docker API/SSR/browser probe; `PropertyImageEndpointTests`; `PropertyImageValidatorTests`; `LocalImageStorageTests`; `property-images.test.tsx` | PASS |
 | UAT-06 | Display Open-Meteo weather | Details show weather or a graceful unavailable state | Not implemented | Pending | BLOCKED |
 | UAT-07 | Manage users and metrics | Admin changes roles/status and sees live database counts | Not implemented | Pending | BLOCKED |
 | UAT-08 | Restart Docker services | SQL data and uploaded images survive a normal restart | Not implemented | Pending | BLOCKED |
@@ -92,6 +92,32 @@ Docker and browser checks passed on rerun.
 18. Created and approved a disposable SQL-backed Property, confirmed its direct public SSR response
     and hydrated page contained the title but no contact number or token marker, then soft-deleted
     it and confirmed the public API returned `404`. UAT-04 is `PASS`.
+
+### UAT-05 live Docker execution
+
+1. Restored and built the .NET solution with zero warnings/errors. All 27 unit and 28 integration
+   tests passed. All 24 frontend tests passed, followed by successful production client and SSR
+   builds.
+2. Confirmed EF reported no pending model changes after generating
+   `20260729063300_AddPropertyImageDimensions`.
+3. Validated Docker Compose, rebuilt API and web, and recreated only those services. SQL Server and
+   both named volumes were preserved; all three services returned healthy.
+4. Ran `tests/Invoke-Phase5DockerUat.ps1`. Registration and login returned 201/200, a Property was
+   created with 201, and its public detail returned 404 before approval.
+5. Uploaded an executable-signature payload declared as JPEG and received 400. Uploaded two
+   decodable PNG files and received 200 with exactly one primary image.
+6. Confirmed the owner could read the hidden image with 200 and a `nosniff` header while anonymous
+   access returned 404.
+7. Approved the Property as Admin. Public detail and controlled image retrieval returned 200, and
+   direct SSR HTML contained both the listing title and image URL.
+8. Changed the primary image and deleted the other image, which returned the listing to Pending.
+   Reapproval succeeded; deletion of the last image returned 409.
+9. Recreated only the API service. The named volume remained
+   `propertyhub_propertyhub-uploads`, and the retained image still returned 200. Evidence Property:
+   `b26cefd4-5632-4066-92cc-fec75e29fb2e`.
+10. Loaded the public list and detail directly in the browser. The image completed with natural
+    width 1, client navigation and direct SSR hydration both worked, and the browser console
+    contained no warnings or errors. UAT-05 is `PASS`.
 
 Remaining scenarios will receive the same evidence and a truthful `PASS` or `FAIL` only when
 implemented and manually executed.

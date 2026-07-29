@@ -5,10 +5,10 @@ Vite SSR, EF Core, SQL Server, and Docker Compose.
 
 ## Current status
 
-Phases 1 through 4 provide the layered foundation, JWT authentication and authorization, City CRUD,
-and Property CRUD with ownership, moderation, availability, and public visibility rules. Public
-property list and detail pages are server-rendered and hydrated; owners manage only their listings,
-and Admins approve or reject pending submissions.
+Phases 1 through 5 provide the layered foundation, JWT authentication and authorization, City CRUD,
+Property CRUD, and secure local property images. Public property list and detail pages are
+server-rendered and hydrated; owners manage only their listings and images, and Admins approve or
+reject pending submissions.
 
 ## Architecture
 
@@ -100,6 +100,27 @@ lookups are scoped by the authenticated user so another owner's identifier retur
 Essential public filters support City, purpose, and property type. Use `/my/properties` for owner
 management and `/admin/properties` for moderation.
 
+## Property image API
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `POST` | `/api/properties/{propertyId}/images` | Active owner; multipart field `images` |
+| `PUT` | `/api/properties/{propertyId}/images/{imageId}/primary` | Active owner |
+| `DELETE` | `/api/properties/{propertyId}/images/{imageId}` | Active owner |
+| `GET` | `/api/properties/{propertyId}/images/{imageId}` | Public listing, owner, or Admin |
+
+Create the property first, then upload one to five JPEG, PNG, or WebP images of at most 5 MB each.
+The API checks extension, declared MIME type, magic bytes, successful decode, dimensions (at most
+8,000 pixels per side and 40 megapixels), count, ownership, and listing state. It generates storage
+names, stores files outside the web root, and streams them with access control and
+`X-Content-Type-Options: nosniff`. The first upload is primary. Changing images returns an approved
+listing to `Pending`; an Admin cannot approve a listing without an image, and the last image cannot
+be deleted.
+
+The React owner page supports upload, primary selection, and deletion. Public cards/details and the
+Admin moderation page display the appropriate image set. Runtime files persist in the
+`propertyhub-uploads` Docker volume and remain excluded from Git.
+
 ## Foundation verification
 
 ```powershell
@@ -112,6 +133,7 @@ npm.cmd run test --prefix frontend/propertyhub-web
 npm.cmd run build --prefix frontend/propertyhub-web
 
 docker compose --env-file .env.example config --quiet
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase5DockerUat.ps1
 ```
 
 ## Docker
@@ -121,7 +143,9 @@ Docker startup, automatic migrations, seeded roles/Admin/cities, and the Phase 2
 and City journeys were previously verified. On 2026-07-29, the Phase 4 images built successfully,
 all three services became healthy, the Property migration applied to the preserved SQL volume, and
 the live Property API and public SSR journeys passed. A direct-route SSR serialization defect found
-during that UAT was fixed and reverified through the production web container.
+during that UAT was fixed and reverified through the production web container. Phase 5 then rebuilt
+only API/web, applied the image-dimension migration, and passed the live secure-upload, moderation,
+SSR display, controlled retrieval, deletion, and upload-volume persistence journey.
 
 The final startup command will be:
 
@@ -137,6 +161,6 @@ acceptance results will be recorded in `docs/UAT_REPORT.md`.
 
 ## Known limitations
 
-See `docs/SCOPE_CUTS.md`. Property cards currently use an accessible placeholder because secure
-property images are Phase 5. Open-Meteo, user administration, dashboard metrics, contact reveal,
-and enquiries remain future slices.
+See `docs/SCOPE_CUTS.md`. Open-Meteo, user administration, dashboard metrics, contact reveal, and
+enquiries remain future slices. Background retention cleanup for hidden image files remains
+deferred until mandatory Gate slices are stable.

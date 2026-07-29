@@ -52,6 +52,22 @@ reviewed entries before Gate submission.
 - **Review:** The backend follows controller to service to identity repository, JWTs stay in browser
   memory, and HTTP integration tests exercise active, disabled, User, and Admin behavior.
 
+### 11. Implement secure local Property images
+
+- **Prompt:** Start Phase 5 implementation after the verified Property CRUD slice.
+- **Why it mattered:** Authorized the mandatory upload vertical slice without beginning the
+  Open-Meteo work in Phase 6.
+- **Review:** The implementation uses separate owner-scoped image endpoints, a Property image
+  service and domain-specific repository, generated names, storage outside the web root, multipart
+  limits, upload rate limiting, and controlled streaming. Validation checks extension, MIME type,
+  magic bytes, full ImageSharp decode, 8,000-pixel/40-megapixel bounds, 5 MB size, and the five-image
+  limit. Image changes reset moderation, approval requires an image, and the last image is retained.
+  Automated verification passed 55 backend and 24 frontend tests. Live Docker UAT verified unsafe
+  rejection, hidden/public authorization, SSR and hydrated display, `nosniff`, primary/deletion
+  rules, and persistence on the unchanged named upload volume. ImageSharp 4 required a license key,
+  so the reviewed dependency was pinned to patched 3.1.12, which restored and built without
+  vulnerability warnings.
+
 ## Testing
 
 The Phase 2 implementation prompt produced service tests with Moq and HTTP integration coverage for

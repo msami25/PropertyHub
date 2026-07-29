@@ -11,7 +11,7 @@ deferrals that protect mandatory delivery.
 | Refresh tokens | DEFERRED | Short-lived in-memory JWT satisfies the Gate | None | Reassess for a production release |
 | ETags and idempotency keys | DEFERRED | Additional concurrency complexity | None | Add with broader concurrency needs |
 | Complex immutable audit infrastructure | DEFERRED | Not needed for initial Gate evidence | None | Add focused audit records later |
-| Background image cleanup | DEFERRED | Secure storage and access control come first | None | Add retention processing later |
+| Background image cleanup | DEFERRED | The Gate requires secure local persistence but not timed retention processing; adding a worker before the remaining Gate slices would expand scope | None | Add the BRD's configurable 30-day cleanup after mandatory Gate verification |
 | Cloud hosting/storage | DEFERRED | Project must run locally | None | Consider only outside this capstone |
 | Rejected-listing correction workflow | DEFERRED | Owners can edit a rejected listing, which returns it to Pending; a separate correction state is not required by the Gate | None | Add review comments/history after mandatory workflows pass |
 
