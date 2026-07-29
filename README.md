@@ -5,10 +5,11 @@ Vite SSR, EF Core, SQL Server, and Docker Compose.
 
 ## Current status
 
-Phases 1 through 6 provide the layered foundation, JWT authentication and authorization, City CRUD,
-Property CRUD, secure local property images, and resilient property weather. Public property list
-and detail pages are server-rendered and hydrated; owners manage only their listings and images,
-and Admins approve or reject pending submissions.
+Phases 1 through 7 provide the layered foundation, JWT authentication and authorization, City CRUD,
+Property CRUD, secure local property images, resilient property weather, and protected Admin user
+management with live database metrics. Public property list and detail pages are server-rendered
+and hydrated; owners manage only their listings and images, and Admins moderate listings, cities,
+roles, and account access.
 
 ## Architecture
 
@@ -136,6 +137,25 @@ UI loads weather independently and displays a friendly fallback when it is unava
 `OpenMeteo__BaseUrl`, `OpenMeteo__TimeoutSeconds`, and `OpenMeteo__CacheMinutes` may be configured
 through environment variables. Safe defaults are documented in `.env.example`.
 
+## Admin dashboard and user management
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `GET` | `/api/admin/dashboard` | Active Admin |
+| `GET` | `/api/admin/users?search=&page=1&pageSize=20` | Active Admin |
+| `PATCH` | `/api/admin/users/{userId}/role` | Active Admin; version checked |
+| `PATCH` | `/api/admin/users/{userId}/status` | Active Admin; version checked |
+
+Open `http://localhost:3000/admin` after signing in as the configured Admin. The dashboard shows
+live account, Property moderation, and City totals from SQL Server. The searchable user table
+supports `User`/`Admin` role changes and account disable/reactivate actions. Mutations send the
+current opaque version in `If-Match`; stale changes return `412 Precondition Failed`.
+
+Status changes require a 5–500-character reason and create an immutable audit record. Role and
+status changes increment the account token version, so existing JWTs fail immediately. Admins
+cannot disable or demote themselves, Admin status cannot be disabled through user management, and
+the last active Admin cannot be demoted.
+
 ## Foundation verification
 
 ```powershell
@@ -149,6 +169,7 @@ npm.cmd run build --prefix frontend/propertyhub-web
 
 docker compose --env-file .env.example config --quiet
 powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase5DockerUat.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File tests/Invoke-Phase7DockerUat.ps1
 ```
 
 ## Docker
@@ -163,6 +184,9 @@ only API/web, applied the image-dimension migration, and passed the live secure-
 SSR display, controlled retrieval, deletion, and upload-volume persistence journey. Phase 6 rebuilt
 only API/web and passed live Open-Meteo success, cache, forced-provider-failure fallback, property
 page continuity, SSR hydration, and provider restoration checks without recreating named volumes.
+Phase 7 applied the Admin user-management migration, rebuilt only API/web, and passed live metrics,
+authorization, role transition, immediate token invalidation, disable/reactivate audit, protected
+UI, safe direct-route SSR, and named-volume preservation checks.
 
 The final startup command will be:
 
@@ -178,6 +202,6 @@ acceptance results will be recorded in `docs/UAT_REPORT.md`.
 
 ## Known limitations
 
-See `docs/SCOPE_CUTS.md`. User administration, dashboard metrics, contact reveal, and enquiries
-remain future slices. Background retention cleanup for hidden image files remains deferred until
-mandatory Gate slices are stable.
+See `docs/SCOPE_CUTS.md`. Contact reveal and enquiries remain future slices. Background retention
+cleanup for hidden image files remains deferred until mandatory Gate slices are stable. Backend
+coverage evidence and the 80% Gate threshold are handled in Phase 8.

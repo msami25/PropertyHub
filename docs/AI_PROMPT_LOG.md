@@ -84,6 +84,23 @@ reviewed entries before Gate submission.
   weather, a faster identical cache hit, graceful fallback against an unreachable provider,
   uninterrupted Property API/SSR pages, successful provider restoration, and clean hydration.
 
+### 13. Implement protected Admin management
+
+- **Prompt:** Implement Phase 7 with live database metrics, user listing, role changes,
+  enable/disable behavior, protected Admin UI/API, validation, authorization tests, Docker
+  verification, self-protection, and immediate access removal without beginning Phase 8.
+- **Why it mattered:** Completed the Gate’s separate Admin experience and its highest-risk account
+  mutations while preserving the established JWT and public-listing security model.
+- **Review:** The controller calls an Admin application service backed by a domain-specific
+  Identity/EF repository. Metrics distinguish total accounts from registered users and count live
+  active/disabled accounts, non-deleted Property moderation states, and Cities. Version-checked
+  role/status mutations increment token versions; status changes persist immutable reasons,
+  actor/target IDs, UTC time, and correlation IDs. The service rejects invalid roles/reasons,
+  stale versions, self-demotion, self-disable, Admin disable, and last-active-Admin demotion.
+  Automated verification passed 79 backend and 30 frontend tests. Live Docker API/SQL/browser UAT
+  confirmed 401/403, metrics, promotion/demotion, immediate stale-token rejection, audited
+  disable/reactivate behavior, protected controls, clean hydration, and preserved named volumes.
+
 ## Testing
 
 The Phase 2 implementation prompt produced service tests with Moq and HTTP integration coverage for

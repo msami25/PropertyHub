@@ -2,7 +2,7 @@
 
 The complete Gate UAT remains `BLOCKED` until all mandatory phases are implemented and exercised.
 Phase 2 authentication and Phase 3 City CRUD were manually exercised against the Docker
-environment on 2026-07-28. Phases 4 through 6 automated workflows pass and live Docker execution
+environment on 2026-07-28. Phases 4 through 7 automated workflows pass and live Docker execution
 completed on 2026-07-29. The direct-route SSR defect found during Phase 4 was fixed, and the
 affected Docker and browser checks passed on rerun.
 
@@ -14,7 +14,7 @@ affected Docker and browser checks passed on rerun.
 | UAT-04 | Complete Property CRUD | Owner creates, views, edits, marks availability, and deletes a listing; Admin moderation controls public visibility | SQL-backed Property workflow, authorization, moderation, public visibility, direct SSR routes, owner/Admin login, hydration, and public-data privacy passed after the SSR transfer fix | Docker Compose/API/SQL/browser probes; `PropertyEndpointTests`; `PropertyServiceTests`; 22 frontend tests | PASS |
 | UAT-05 | Upload property images | Valid images persist and display; unsafe input is rejected | Owner uploaded two decoded PNGs, changed the primary image, deleted a non-last image, and received 409 for last-image deletion; invalid signature returned 400; hidden/public access followed moderation; SSR and hydrated pages displayed the image; the image remained available after API recreation | Docker API/SSR/browser probe; `PropertyImageEndpointTests`; `PropertyImageValidatorTests`; `LocalImageStorageTests`; `property-images.test.tsx` | PASS |
 | UAT-06 | Display Open-Meteo weather | Details show weather or a graceful unavailable state | Live City-coordinate weather rendered; an unreachable provider returned a friendly unavailable result while Property API and SSR remained 200 | Docker API/browser probes; `OpenMeteoWeatherClientTests`; `PropertyWeatherServiceTests`; `property-public.test.tsx` | PASS |
-| UAT-07 | Manage users and metrics | Admin changes roles/status and sees live database counts | Not implemented | Pending | BLOCKED |
+| UAT-07 | Manage users and metrics | Admin changes roles/status and sees live database counts | Live metrics matched SQL-backed state; role and status changes invalidated existing JWTs; self-demotion/self-disable returned 409; disable/reactivate wrote audit records and updated metrics | `Invoke-Phase7DockerUat.ps1`; Docker API/SQL/browser probes; `AdminEndpointTests`; `AdminServiceTests`; `admin-dashboard.test.tsx` | PASS |
 | UAT-08 | Restart Docker services | SQL data and uploaded images survive a normal restart | Not implemented | Pending | BLOCKED |
 
 ## Phase 2 execution steps
@@ -142,6 +142,35 @@ affected Docker and browser checks passed on rerun.
    weather in Faisalabad” with condition, temperature, humidity, wind, and a UTC observation time.
    A second direct navigation also rendered weather with no browser console or hydration warnings
    or errors, and no provider-specific details appeared in the page. UAT-06 is `PASS`.
+
+### UAT-07 live Docker execution
+
+1. Restored and built the .NET solution with zero warnings/errors. All 38 unit and 41 integration
+   tests passed. EF reported no pending model changes. A clean npm install found zero
+   vulnerabilities; all 30 frontend tests and both production builds passed.
+2. Validated Compose, rebuilt API/web, and recreated only those two services. SQL Server was not
+   recreated. Migration `20260729072220_AddAdminUserManagement` applied once, and SQL/upload
+   volumes remained `propertyhub_propertyhub-sql-data` and
+   `propertyhub_propertyhub-uploads`.
+3. Ran `tests/Invoke-Phase7DockerUat.ps1`. API/web health returned 200; anonymous Admin access
+   returned 401 and User-to-Admin access returned 403.
+4. Promoted a disposable User to Admin and confirmed its prior JWT immediately returned 403.
+   Re-login issued an Admin JWT. Self-demotion returned 409. A different Admin demoted the account,
+   its previous Admin JWT immediately returned 403, and re-login issued a User JWT.
+5. Disabled the User with a reason. Its existing JWT and subsequent login returned 403.
+   Self-disable of the seeded Admin returned 409. The disabled metric increased from 1 to 2.
+6. Reactivated the User and confirmed login succeeded as User. Active/disabled metrics returned to
+   their baseline of 13/1. SQL Server contained exactly two immutable status-change audit rows for
+   the disable/reactivate pair. The live dashboard also reported three non-deleted properties and
+   eight cities.
+7. Signed in through the production web container with a disposable Admin. The dashboard rendered
+   current SQL-backed metrics and the searchable user table. Role promotion/demotion and
+   disable/enable actions succeeded through the UI; metric cards updated immediately.
+8. Self-demotion and Admin status controls were visibly unavailable in the UI. Browser hydration
+   and all interactions produced no console warnings or errors. A direct `/admin` request returned
+   HTTP 200 with only the signed-out shell and no Admin data.
+9. Restored the browser-managed target to Active/User and demoted the disposable browser Admin to
+   User, leaving no additional privileged test account. UAT-07 is `PASS`.
 
 Remaining scenarios will receive the same evidence and a truthful `PASS` or `FAIL` only when
 implemented and manually executed.
