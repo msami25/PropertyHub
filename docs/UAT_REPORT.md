@@ -2,7 +2,7 @@
 
 The complete Gate UAT remains `BLOCKED` until all mandatory phases are implemented and exercised.
 Phase 2 authentication and Phase 3 City CRUD were manually exercised against the Docker
-environment on 2026-07-28. Phase 4 and Phase 5 automated workflows pass and live Docker execution
+environment on 2026-07-28. Phases 4 through 6 automated workflows pass and live Docker execution
 completed on 2026-07-29. The direct-route SSR defect found during Phase 4 was fixed, and the
 affected Docker and browser checks passed on rerun.
 
@@ -13,7 +13,7 @@ affected Docker and browser checks passed on rerun.
 | UAT-03 | Complete City CRUD | Admin lists, creates, edits, and deletes an unused City; referenced deletion returns 409 | Seeded Admin completed create/read/update/delete through Docker API and create/edit/delete through the browser UI; invalid input returned 400, duplicates and referenced deletion returned 409 | Docker HTTP/SQL and browser probes; `CityEndpointTests`; `CityServiceTests`; `city-management.test.tsx` | PASS |
 | UAT-04 | Complete Property CRUD | Owner creates, views, edits, marks availability, and deletes a listing; Admin moderation controls public visibility | SQL-backed Property workflow, authorization, moderation, public visibility, direct SSR routes, owner/Admin login, hydration, and public-data privacy passed after the SSR transfer fix | Docker Compose/API/SQL/browser probes; `PropertyEndpointTests`; `PropertyServiceTests`; 22 frontend tests | PASS |
 | UAT-05 | Upload property images | Valid images persist and display; unsafe input is rejected | Owner uploaded two decoded PNGs, changed the primary image, deleted a non-last image, and received 409 for last-image deletion; invalid signature returned 400; hidden/public access followed moderation; SSR and hydrated pages displayed the image; the image remained available after API recreation | Docker API/SSR/browser probe; `PropertyImageEndpointTests`; `PropertyImageValidatorTests`; `LocalImageStorageTests`; `property-images.test.tsx` | PASS |
-| UAT-06 | Display Open-Meteo weather | Details show weather or a graceful unavailable state | Not implemented | Pending | BLOCKED |
+| UAT-06 | Display Open-Meteo weather | Details show weather or a graceful unavailable state | Live City-coordinate weather rendered; an unreachable provider returned a friendly unavailable result while Property API and SSR remained 200 | Docker API/browser probes; `OpenMeteoWeatherClientTests`; `PropertyWeatherServiceTests`; `property-public.test.tsx` | PASS |
 | UAT-07 | Manage users and metrics | Admin changes roles/status and sees live database counts | Not implemented | Pending | BLOCKED |
 | UAT-08 | Restart Docker services | SQL data and uploaded images survive a normal restart | Not implemented | Pending | BLOCKED |
 
@@ -118,6 +118,30 @@ affected Docker and browser checks passed on rerun.
 10. Loaded the public list and detail directly in the browser. The image completed with natural
     width 1, client navigation and direct SSR hydration both worked, and the browser console
     contained no warnings or errors. UAT-05 is `PASS`.
+
+### UAT-06 live Docker execution
+
+1. Restored and built the .NET solution with zero warnings/errors. All 30 unit and 36 integration
+   tests passed. All 26 frontend tests passed, followed by successful production client and SSR
+   builds.
+2. Confirmed EF reported no pending model changes and Docker Compose configuration was valid.
+   Rebuilt and recreated only API and web; SQL Server and the named SQL/upload volumes were
+   preserved, and all three services became healthy.
+3. Requested weather for approved Property
+   `b26cefd4-5632-4066-92cc-fec75e29fb2e`. Its stored Faisalabad City coordinates produced an
+   available current observation and a friendly condition. The first request completed in 659 ms;
+   an immediate second request completed in 8 ms with the identical payload, confirming the
+   successful-result cache.
+4. Recreated only API with a deliberately unreachable local provider address and a one-second
+   timeout. The weather endpoint returned HTTP 200 with `isAvailable: false`; the public Property
+   API and direct SSR detail page both continued to return HTTP 200.
+5. Restored the real provider configuration, recreated only API, and confirmed weather became
+   available again. No named volume was deleted or recreated; the uploads volume remained
+   `propertyhub_propertyhub-uploads`.
+6. Loaded the Property detail URL directly in the browser. The hydrated page displayed “Current
+   weather in Faisalabad” with condition, temperature, humidity, wind, and a UTC observation time.
+   A second direct navigation also rendered weather with no browser console or hydration warnings
+   or errors, and no provider-specific details appeared in the page. UAT-06 is `PASS`.
 
 Remaining scenarios will receive the same evidence and a truthful `PASS` or `FAIL` only when
 implemented and manually executed.

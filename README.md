@@ -5,10 +5,10 @@ Vite SSR, EF Core, SQL Server, and Docker Compose.
 
 ## Current status
 
-Phases 1 through 5 provide the layered foundation, JWT authentication and authorization, City CRUD,
-Property CRUD, and secure local property images. Public property list and detail pages are
-server-rendered and hydrated; owners manage only their listings and images, and Admins approve or
-reject pending submissions.
+Phases 1 through 6 provide the layered foundation, JWT authentication and authorization, City CRUD,
+Property CRUD, secure local property images, and resilient property weather. Public property list
+and detail pages are server-rendered and hydrated; owners manage only their listings and images,
+and Admins approve or reject pending submissions.
 
 ## Architecture
 
@@ -121,6 +121,21 @@ The React owner page supports upload, primary selection, and deletion. Public ca
 Admin moderation page display the appropriate image set. Runtime files persist in the
 `propertyhub-uploads` Docker volume and remain excluded from Git.
 
+## Property weather API
+
+| Method | Endpoint | Access |
+|---|---|---|
+| `GET` | `/api/properties/{propertyId}/weather` | Public; approved and available property only |
+
+The API requests current conditions from Open-Meteo using the property's stored City latitude and
+longitude. A typed `HttpClient` has a five-second timeout, and successful results are cached by City
+for 30 minutes. Provider errors, timeouts, invalid responses, and unavailable observations return a
+provider-neutral unavailable result without breaking the property API or page. The property detail
+UI loads weather independently and displays a friendly fallback when it is unavailable.
+
+`OpenMeteo__BaseUrl`, `OpenMeteo__TimeoutSeconds`, and `OpenMeteo__CacheMinutes` may be configured
+through environment variables. Safe defaults are documented in `.env.example`.
+
 ## Foundation verification
 
 ```powershell
@@ -145,7 +160,9 @@ all three services became healthy, the Property migration applied to the preserv
 the live Property API and public SSR journeys passed. A direct-route SSR serialization defect found
 during that UAT was fixed and reverified through the production web container. Phase 5 then rebuilt
 only API/web, applied the image-dimension migration, and passed the live secure-upload, moderation,
-SSR display, controlled retrieval, deletion, and upload-volume persistence journey.
+SSR display, controlled retrieval, deletion, and upload-volume persistence journey. Phase 6 rebuilt
+only API/web and passed live Open-Meteo success, cache, forced-provider-failure fallback, property
+page continuity, SSR hydration, and provider restoration checks without recreating named volumes.
 
 The final startup command will be:
 
@@ -161,6 +178,6 @@ acceptance results will be recorded in `docs/UAT_REPORT.md`.
 
 ## Known limitations
 
-See `docs/SCOPE_CUTS.md`. Open-Meteo, user administration, dashboard metrics, contact reveal, and
-enquiries remain future slices. Background retention cleanup for hidden image files remains
-deferred until mandatory Gate slices are stable.
+See `docs/SCOPE_CUTS.md`. User administration, dashboard metrics, contact reveal, and enquiries
+remain future slices. Background retention cleanup for hidden image files remains deferred until
+mandatory Gate slices are stable.

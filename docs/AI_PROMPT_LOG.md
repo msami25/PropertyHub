@@ -68,6 +68,22 @@ reviewed entries before Gate submission.
   so the reviewed dependency was pinned to patched 3.1.12, which restored and built without
   vulnerability warnings.
 
+### 12. Integrate resilient property weather
+
+- **Prompt:** Implement Phase 6 with a typed Open-Meteo client, finite timeout, caching, graceful
+  fallback, City-coordinate weather UI, automated resilience tests, documentation, and live Docker
+  verification without beginning Phase 7.
+- **Why it mattered:** Completed the mandatory real external API slice while explicitly protecting
+  the public Property experience from provider latency and failure.
+- **Review:** A dedicated weather controller calls the application service, which uses the existing
+  public Property repository and a typed infrastructure client. The provider request uses stored
+  City coordinates, a five-second timeout, validated provider responses, friendly WMO condition
+  mapping, and a 30-minute success-only memory cache. The public DTO contains only useful weather
+  fields. Unit and isolated HTTP tests cover success, timeout, failure, malformed/unavailable data,
+  and caching; React tests cover success and fallback. Live Docker checks confirmed real Faisalabad
+  weather, a faster identical cache hit, graceful fallback against an unreachable provider,
+  uninterrupted Property API/SSR pages, successful provider restoration, and clean hydration.
+
 ## Testing
 
 The Phase 2 implementation prompt produced service tests with Moq and HTTP integration coverage for
