@@ -7,6 +7,7 @@ using PropertyHub.Application.Interfaces.Services;
 using PropertyHub.Infrastructure.Data;
 using PropertyHub.Infrastructure.Data.Repositories;
 using PropertyHub.Infrastructure.Files;
+using PropertyHub.Infrastructure.External;
 using PropertyHub.Infrastructure.Identity;
 
 namespace PropertyHub.Infrastructure;
@@ -40,6 +41,40 @@ public static class DependencyInjection
         services.AddScoped<ICityRepository, CityRepository>();
         services.AddScoped<IPropertyRepository, PropertyRepository>();
         services.AddScoped<IPropertyImageRepository, PropertyImageRepository>();
+        services.AddMemoryCache();
+        var openMeteoBaseUrl = configuration["OpenMeteo:BaseUrl"];
+        if (string.IsNullOrWhiteSpace(openMeteoBaseUrl))
+        {
+            openMeteoBaseUrl = "https://api.open-meteo.com";
+        }
+        var configuredTimeout = int.TryParse(
+            configuration["OpenMeteo:TimeoutSeconds"],
+            out var timeoutValue)
+            ? timeoutValue
+            : 5;
+        var configuredCacheMinutes = int.TryParse(
+            configuration["OpenMeteo:CacheMinutes"],
+            out var cacheValue)
+            ? cacheValue
+            : 30;
+        var timeoutSeconds = Math.Clamp(
+            configuredTimeout,
+            1,
+            30);
+        var cacheMinutes = Math.Clamp(
+            configuredCacheMinutes,
+            1,
+            1440);
+        var openMeteoOptions = new OpenMeteoOptions(
+            openMeteoBaseUrl,
+            TimeSpan.FromSeconds(timeoutSeconds),
+            TimeSpan.FromMinutes(cacheMinutes));
+        services.AddSingleton(openMeteoOptions);
+        services.AddHttpClient<IOpenMeteoWeatherClient, OpenMeteoWeatherClient>(client =>
+        {
+            client.BaseAddress = new Uri($"{openMeteoOptions.BaseUrl.TrimEnd('/')}/");
+            client.Timeout = openMeteoOptions.Timeout;
+        });
         var imageRoot = configuration["ImageStorage:RootPath"];
         if (string.IsNullOrWhiteSpace(imageRoot))
         {

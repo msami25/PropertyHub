@@ -27,6 +27,9 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: ${ConnectionStrings__DefaultConnection}
       ImageStorage__RootPath: ${ImageStorage__RootPath}
+      OpenMeteo__BaseUrl: ${OpenMeteo__BaseUrl}
+      OpenMeteo__TimeoutSeconds: ${OpenMeteo__TimeoutSeconds}
+      OpenMeteo__CacheMinutes: ${OpenMeteo__CacheMinutes}
       Jwt__Issuer: ${Jwt__Issuer}
       Jwt__Audience: ${Jwt__Audience}
       Jwt__SigningKey: ${Jwt__SigningKey}
